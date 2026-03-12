@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd D:/Workspace/JavaProject/Java_qa_monitor && mvn clean compile 2>&1 | grep -i \"error\\\\|ERROR\\\\|ScanController\")",
+      "Bash(curl -s -X POST localhost:8080/user/register -H \"Content-Type: application/json\" -d '{\"username\":\"test\",\"password\":\"123456\"}' 2>&1)",
+      "Bash(curl -s -X POST localhost:8080/user/login -H \"Content-Type: application/json\" -d '{\"username\":\"test\",\"password\":\"123456\"}' 2>&1)",
+      "Bash(curl -s -H \"Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ0ZXN0IiwidXNlcklkIjo0LCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3MzI2MTYyNywiZXhwIjoxNzczMzQ4MDI3fQ.UUT8SgoaFMBInkBH-BI57q81dGwm0pwcuRE16g7FICFn2lTeacHq2duyWCGWTS6Q\" localhost:8080/user/info 2>&1)",
+      "Bash(cd D:/Workspace/JavaProject/Java_qa_monitor/frontend && npm install 2>&1)"
+    ]
+  }
+}

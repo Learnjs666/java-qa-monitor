@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.swpu.java_qa_monitor.mapper.RuleConfigMapper">
+    <resultMap id="BaseResultMap" type="cn.edu.swpu.java_qa_monitor.domain.RuleConfig">
+        <id property="id" column="id"/>
+        <result property="ruleCode" column="rule_code"/>
+        <result property="ruleName" column="rule_name"/>
+        <result property="category" column="category"/>
+        <result property="severity" column="severity"/>
+        <result property="enabled" column="enabled"/>
+        <result property="thresholdValue" column="threshold_value"/>
+        <result property="description" column="description"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+</mapper>
