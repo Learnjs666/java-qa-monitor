@@ -5,7 +5,7 @@ import cn.edu.swpu.java_qa_monitor.common.dto.LoginResponse;
 import cn.edu.swpu.java_qa_monitor.common.dto.RegisterRequest;
 import cn.edu.swpu.java_qa_monitor.domain.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
-
+// test
 public interface SysUserService extends IService<SysUser> {
 
     LoginResponse login(LoginRequest request);
