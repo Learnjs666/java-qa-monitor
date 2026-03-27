@@ -1,63 +1,86 @@
 <template>
-  <div class="auth-container">
-    <div class="bg-shapes">
-      <div class="shape shape-1"></div>
-      <div class="shape shape-2"></div>
-      <div class="shape shape-3"></div>
-    </div>
+  <div class="terminal-auth-viewport">
+    <div class="grid-overlay"></div>
 
-    <div class="auth-card">
-      <div class="auth-header">
-        <div class="auth-logo">
-          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
-            <rect width="32" height="32" rx="8" fill="url(#grad2)"/>
-            <path d="M8 22L14 10L20 18L24 14" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="24" cy="14" r="2" fill="#7ee8fa"/>
-            <defs>
-              <linearGradient id="grad2" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#4f8cff"/>
-                <stop offset="1" stop-color="#a259ff"/>
-              </linearGradient>
-            </defs>
-          </svg>
+    <div class="bento-container">
+
+      <div class="status-panel">
+        <div class="panel-header">
+          <span class="dot blink pulse-blue"></span>
+          <span class="mono-text">NEW_ENTITY // INITIALIZATION</span>
         </div>
-        <h1 class="auth-title">创建账号</h1>
-        <p class="auth-subtitle">加入 Java QA Monitor，开始质量监控之旅</p>
+
+        <div class="brand-hero">
+          <h1 class="display-title">SYSTEM<br>ACCESS<br>REQUEST</h1>
+          <div class="barcode">
+            <svg viewBox="0 0 100 20" preserveAspectRatio="none">
+              <path d="M0,0 h1 v20 h-1 Z M3,0 h3 v20 h-3 Z M8,0 h1 v20 h-1 Z M11,0 h4 v20 h-4 Z M17,0 h2 v20 h-2 Z M21,0 h1 v20 h-1 Z M24,0 h3 v20 h-3 Z M29,0 h1 v20 h-1 Z M33,0 h2 v20 h-2 Z M37,0 h5 v20 h-5 Z M44,0 h1 v20 h-1 Z M47,0 h3 v20 h-3 Z M52,0 h2 v20 h-2 Z M55,0 h4 v20 h-4 Z M62,0 h1 v20 h-1 Z M65,0 h3 v20 h-3 Z M70,0 h2 v20 h-2 Z M74,0 h5 v20 h-5 Z M81,0 h1 v20 h-1 Z M84,0 h3 v20 h-3 Z M89,0 h2 v20 h-2 Z M93,0 h4 v20 h-4 Z M99,0 h1 v20 h-1 Z" fill="currentColor" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="tech-specs">
+          <div class="spec-row"><span>ACTION:</span><span>REGISTRATION</span></div>
+          <div class="spec-row"><span>CLEARANCE:</span><span>PENDING</span></div>
+          <div class="spec-row"><span>ENCRYPTION:</span><span>AES-256</span></div>
+        </div>
       </div>
 
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="0" @keyup.enter="handleRegister">
-        <el-form-item prop="username">
-          <div class="input-wrap">
-            <span class="input-icon">
-              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-              </svg>
-            </span>
-            <el-input v-model="form.username" placeholder="请输入用户名" size="large" class="styled-input" />
-          </div>
-        </el-form-item>
-        <el-form-item prop="password">
-          <div class="input-wrap">
-            <span class="input-icon">
-              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
-              </svg>
-            </span>
-            <el-input v-model="form.password" type="password" placeholder="密码（至少6位）" size="large" show-password class="styled-input" />
-          </div>
-        </el-form-item>
-        <el-form-item>
-          <button class="submit-btn" :class="{ loading }" @click="handleRegister" :disabled="loading">
-            <span class="btn-spinner" v-if="loading"></span>
-            <span>{{ loading ? '注册中...' : '创建账号' }}</span>
-          </button>
-        </el-form-item>
-      </el-form>
+      <div class="form-panel">
+        <div class="form-header">
+          <h2 class="form-title">创建账号</h2>
+          <p class="form-subtitle">加入 Java QA Monitor，配置您的专属监控环境。</p>
+        </div>
 
-      <div class="auth-footer">
-        <span>已有账号？</span>
-        <a class="link" @click="router.push('/login')">前往登录</a>
+        <el-form
+            ref="formRef"
+            :model="form"
+            :rules="rules"
+            label-width="0"
+            @keyup.enter="handleRegister"
+            class="terminal-form"
+        >
+          <el-form-item prop="username">
+            <div class="input-wrapper">
+              <span class="input-prefix">用户</span>
+              <el-input
+                  v-model="form.username"
+                  placeholder="请输入用户名"
+                  size="large"
+                  class="brutal-input"
+              />
+            </div>
+          </el-form-item>
+
+          <el-form-item prop="password">
+            <div class="input-wrapper">
+              <span class="input-prefix">密码</span>
+              <el-input
+                  v-model="form.password"
+                  type="password"
+                  placeholder="密码（至少6位）"
+                  size="large"
+                  show-password
+                  class="brutal-input"
+              />
+            </div>
+          </el-form-item>
+
+          <el-form-item class="action-item">
+            <button class="brutal-submit" :class="{ loading }" @click.prevent="handleRegister" :disabled="loading">
+              <span class="btn-spinner" v-if="loading"></span>
+              <span class="btn-text">{{ loading ? '注册中...' : '创建账号' }}</span>
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14" stroke-linecap="square"/></svg>
+            </button>
+          </el-form-item>
+        </el-form>
+
+        <div class="form-footer">
+          <span class="mono-text">已有账号？</span>
+          <button class="register-link" @click="router.push('/login')">前往登录</button>
+        </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -95,103 +118,326 @@ async function handleRegister() {
 </script>
 
 <style scoped>
-.auth-container {
+/* 引入顶级设计字体 */
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@400;500&display=swap');
+
+.terminal-auth-viewport {
+  --bg-dark: #090a0f;
+  --bg-panel: #11131a;
+  --clr-accent: #ccff00; /* Electric Lime */
+  --clr-accent-dim: rgba(204, 255, 0, 0.15);
+  --clr-secondary: #00e5ff; /* Cyan for Register diff */
+  --clr-text-main: #ffffff;
+  --clr-text-muted: #6b7280;
+  --clr-border: #272a35;
+  --clr-error: #ff3366;
+
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f1a2e 100%);
+  background-color: var(--bg-dark);
+  font-family: 'Space Mono', monospace;
   position: relative;
   overflow: hidden;
+  padding: 2rem;
 }
 
-.bg-shapes { position: absolute; inset: 0; pointer-events: none; }
-
-.shape {
+/* 工业风量化网格背景 */
+.grid-overlay {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.25;
-  animation: float 8s ease-in-out infinite;
+  inset: 0;
+  background-image:
+      linear-gradient(var(--clr-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--clr-border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.shape-1 { width: 400px; height: 400px; background: #a259ff; top: -100px; right: -100px; animation-delay: 0s; }
-.shape-2 { width: 300px; height: 300px; background: #4f8cff; bottom: -80px; left: -80px; animation-delay: 3s; }
-.shape-3 { width: 200px; height: 200px; background: #22d3ee; top: 50%; left: 20%; animation-delay: 6s; }
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-20px) scale(1.05); }
-}
-
-.auth-card {
-  background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px;
-  padding: 44px 48px;
-  width: 420px;
+/* 主体 Bento 容器 */
+.bento-container {
   position: relative;
-  z-index: 1;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  z-index: 10;
+  display: flex;
+  width: 100%;
+  max-width: 1000px;
+  min-height: 600px;
+  background: var(--bg-panel);
+  border: 1px solid var(--clr-border);
+  box-shadow: -16px 16px 0px rgba(0,0,0,0.5); /* 注册页阴影方向微调，与登录页形成对称感 */
 }
 
-.auth-header { text-align: center; margin-bottom: 36px; }
-.auth-logo { margin-bottom: 14px; }
-.auth-title { font-size: 22px; font-weight: 800; color: #f1f5f9; margin: 0 0 8px 0; }
-.auth-subtitle { font-size: 14px; color: #64748b; margin: 0; }
-
-.input-wrap { position: relative; width: 100%; }
-
-.input-icon {
-  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-  color: #475569; z-index: 10; display: flex; align-items: center;
+/* ==================== 左侧：监控面板 ==================== */
+.status-panel {
+  flex: 1;
+  border-right: 1px solid var(--clr-border);
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: radial-gradient(circle at top right, #1a1d27 0%, var(--bg-panel) 100%);
 }
 
-.styled-input :deep(.el-input__wrapper) {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  border-radius: 10px !important;
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.8rem;
+  color: var(--clr-text-muted);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--clr-secondary);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--clr-secondary);
+}
+
+.pulse-blue {
+  background-color: var(--clr-secondary);
+  box-shadow: 0 0 10px var(--clr-secondary);
+}
+
+.blink {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.display-title {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 4.5rem;
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  color: var(--clr-text-main);
+  margin: 0 0 2rem 0;
+  text-transform: uppercase;
+}
+
+.barcode {
+  width: 100px;
+  height: 30px;
+  color: var(--clr-text-muted);
+  opacity: 0.5;
+}
+
+.tech-specs {
+  border-top: 1px solid var(--clr-border);
+  padding-top: 1.5rem;
+}
+
+.spec-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--clr-text-muted);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.spec-row span:last-child {
+  color: var(--clr-text-main);
+}
+
+/* ==================== 右侧：表单面板 ==================== */
+.form-panel {
+  flex: 0 0 450px;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.form-header {
+  margin-bottom: 3rem;
+}
+
+.form-title {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--clr-accent);
+  margin: 0 0 0.5rem 0;
+  letter-spacing: 0.05em;
+}
+
+.form-subtitle {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 0.85rem;
+  color: var(--clr-text-muted);
+  margin: 0;
+}
+
+/* 彻底覆盖 Element Plus 样式 */
+.terminal-form {
+  width: 100%;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--bg-dark);
+  border: 1px solid var(--clr-border);
+  transition: all 0.2s ease;
+  margin-bottom: 8px; /* 给表单项之间增加一点呼吸空间 */
+}
+
+.input-wrapper:focus-within {
+  border-color: var(--clr-accent);
+  box-shadow: 4px 4px 0px var(--clr-accent-dim);
+}
+
+.input-prefix {
+  padding-left: 1rem;
+  font-size: 0.85rem;
+  color: var(--clr-accent);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.brutal-input :deep(.el-input__wrapper) {
+  background: transparent !important;
+  border: none !important;
   box-shadow: none !important;
-  padding-left: 40px !important;
-  transition: border-color 0.2s;
+  padding: 0 1rem;
+  height: 54px;
 }
 
-.styled-input :deep(.el-input__wrapper:hover),
-.styled-input :deep(.el-input__wrapper.is-focus) {
-  border-color: rgba(79,140,255,0.5) !important;
+.brutal-input :deep(.el-input__inner) {
+  color: var(--clr-text-main) !important;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.9rem;
 }
 
-.styled-input :deep(.el-input__inner) { color: #e2e8f0 !important; font-size: 14px; }
-.styled-input :deep(.el-input__inner::placeholder) { color: #475569; }
-
-.submit-btn {
-  width: 100%; height: 48px;
-  background: linear-gradient(135deg, #a259ff, #4f8cff);
-  border: none; border-radius: 12px;
-  color: #fff; font-size: 15px; font-weight: 600;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  gap: 8px; transition: opacity 0.2s, transform 0.1s; margin-top: 4px;
+.brutal-input :deep(.el-input__inner::placeholder) {
+  color: #3f4455;
 }
 
-.submit-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-.submit-btn:active:not(:disabled) { transform: translateY(0); }
-.submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+/* 错误信息样式覆盖 */
+:deep(.el-form-item__error) {
+  color: var(--clr-error);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  padding-top: 2px;
+  position: static;
+}
+
+/* 工业风提交按钮 */
+.action-item {
+  margin-top: 24px;
+  margin-bottom: 0;
+}
+
+.brutal-submit {
+  width: 100%;
+  height: 56px;
+  background: var(--clr-text-main);
+  color: var(--bg-dark);
+  border: none;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow: 6px 6px 0px var(--clr-accent);
+}
+
+.brutal-submit:hover:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0px var(--clr-accent);
+  background: var(--clr-accent);
+}
+
+.brutal-submit:active:not(:disabled) {
+  transform: translate(6px, 6px);
+  box-shadow: 0px 0px 0px var(--clr-accent);
+}
+
+.brutal-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-icon {
+  width: 18px;
+  height: 18px;
+}
 
 .btn-spinner {
-  width: 16px; height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: white; border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--bg-dark);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
-.auth-footer { text-align: center; margin-top: 24px; font-size: 13px; color: #475569; }
+/* 底部区域 */
+.form-footer {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed var(--clr-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
 
-.link { color: #4f8cff; cursor: pointer; font-weight: 600; margin-left: 6px; transition: color 0.2s; }
-.link:hover { color: #7eb6ff; text-decoration: underline; }
+.mono-text {
+  color: var(--clr-text-muted);
+}
 
-:deep(.el-form-item) { margin-bottom: 18px; }
-:deep(.el-form-item__error) { color: #f87171; font-size: 12px; padding-top: 4px; }
+.register-link {
+  background: transparent;
+  border: none;
+  color: var(--clr-accent);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.register-link:hover {
+  color: var(--clr-text-main);
+}
+
+/* 响应式断点适配 */
+@media (max-width: 850px) {
+  .bento-container {
+    flex-direction: column;
+    box-shadow: -8px 8px 0px rgba(0,0,0,0.5);
+  }
+  .status-panel {
+    border-right: none;
+    border-bottom: 1px solid var(--clr-border);
+    padding: 2rem;
+  }
+  .display-title {
+    font-size: 3rem;
+  }
+  .form-panel {
+    flex: auto;
+    padding: 2rem;
+  }
+}
 </style>
