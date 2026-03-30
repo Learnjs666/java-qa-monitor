@@ -11,3 +11,7 @@ export function register(data: { username: string; password: string; role?: stri
 export function getUserInfo() {
   return request.get('/user/info')
 }
+
+export function getUserList() {
+  return request.get('/user/list')
+}

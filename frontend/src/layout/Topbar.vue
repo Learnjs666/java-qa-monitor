@@ -1,20 +1,25 @@
 <template>
-  <div class="topbar">
-    <div class="topbar-left">
-      <div class="breadcrumb">
-        <span class="page-title">{{ pageTitle }}</span>
-      </div>
+  <div class="terminal-topbar">
+    <div class="process-indicator">
+      <span class="process-label">CURRENT_PROCESS</span>
+      <span class="separator">//</span>
+      <h1 class="page-title">{{ pageTitle.toUpperCase() }}</h1>
     </div>
-    <div class="topbar-right">
-      <div class="user-info">
-        <div class="avatar">{{ avatarChar }}</div>
-        <span class="username">{{ userStore.username || '用户' }}</span>
+
+    <div class="system-controls">
+      <div class="user-block">
+        <div class="avatar-square">[{{ avatarChar }}]</div>
+        <div class="user-details">
+          <span class="role-label">AUTH_USER</span>
+          <span class="username">{{ userStore.username || 'UNKNOWN_ENTITY' }}</span>
+        </div>
       </div>
-      <button class="logout-btn" @click="handleLogout">
-        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-          <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/>
+      
+      <button class="brutal-logout-btn" @click="handleLogout">
+        <span class="btn-text">TERMINATE</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10" stroke-linecap="square" stroke-linejoin="miter"/>
         </svg>
-        退出
       </button>
     </div>
   </div>
@@ -31,13 +36,13 @@ const router = useRouter()
 const route = useRoute()
 
 const pageTitles: Record<string, string> = {
-  '/dashboard': '仪表盘',
-  '/project': '项目管理',
-  '/rules': '规则配置',
+  '/dashboard': 'Dashboard_Metrics',
+  '/project': 'Project_Matrix',
+  '/rules': 'Rule_Configurations',
 }
 
 const pageTitle = computed(() => {
-  return pageTitles[route.path] || pageTitles[Object.keys(pageTitles).find(k => route.path.startsWith(k)) || ''] || '页面'
+  return pageTitles[route.path] || pageTitles[Object.keys(pageTitles).find(k => route.path.startsWith(k)) || ''] || 'Standby_Mode'
 })
 
 const avatarChar = computed(() => {
@@ -61,77 +66,110 @@ function handleLogout() {
 </script>
 
 <style scoped>
-.topbar {
+.terminal-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
-  padding: 0 24px;
-  background: #ffffff;
-  border-bottom: 1px solid #f0f0f0;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  height: 70px;
+  padding: 0 2rem;
+  background-color: var(--bg-panel);
 }
 
-.topbar-left {
+.process-indicator {
   display: flex;
   align-items: center;
+  gap: 12px;
+}
+
+.process-label {
+  font-size: 0.75rem;
+  color: var(--clr-text-muted);
+  font-weight: 700;
+}
+
+.separator {
+  color: var(--clr-accent);
+  font-weight: 700;
 }
 
 .page-title {
-  font-size: 18px;
+  margin: 0;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--clr-text-main);
+  letter-spacing: 0.05em;
 }
 
-.topbar-right {
+.system-controls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 2rem;
 }
 
-.user-info {
+.user-block {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding-right: 2rem;
+  border-right: 1px dashed var(--clr-border);
 }
 
-.avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #4f8cff, #a259ff);
-  color: #fff;
-  font-size: 14px;
+.avatar-square {
+  width: 36px;
+  height: 36px;
+  background: var(--bg-dark);
+  border: 1px solid var(--clr-accent);
+  color: var(--clr-accent);
+  font-size: 1rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 2px 2px 0px rgba(204, 255, 0, 0.2);
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.role-label {
+  font-size: 0.65rem;
+  color: var(--clr-text-muted);
 }
 
 .username {
-  font-size: 14px;
-  font-weight: 500;
-  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--clr-text-main);
 }
 
-.logout-btn {
+/* 终止按钮 (Brutalist style) */
+.brutal-logout-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 500;
+  gap: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid var(--clr-border);
+  color: var(--clr-text-muted);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
-.logout-btn:hover {
-  background: #fee2e2;
-  border-color: #fca5a5;
-  color: #ef4444;
+.brutal-logout-btn:hover {
+  background: #ff3366; /* Danger Red */
+  border-color: #ff3366;
+  color: #fff;
+  box-shadow: 4px 4px 0px rgba(255, 51, 102, 0.3);
+  transform: translate(-2px, -2px);
+}
+
+.brutal-logout-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px transparent;
 }
 </style>

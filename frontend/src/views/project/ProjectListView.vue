@@ -1,74 +1,87 @@
 <template>
-  <div class="page">
+  <div class="terminal-page">
     <div class="page-header">
-      <h2 class="page-title">项目列表</h2>
-      <button class="primary-btn" @click="showCreateDialog = true">
-        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
-        </svg>
-        新建项目
+      <div class="header-title-group">
+        <span class="blinking-cursor">_</span>
+        <h2 class="display-title">PROJECT_MATRIX // DIRECTORY</h2>
+      </div>
+      <button class="brutal-btn primary" @click="showCreateDialog = true">
+        <span class="btn-icon">+</span>
+        <span class="btn-text">INITIALIZE_PROJECT</span>
       </button>
     </div>
 
-    <!-- Project Grid -->
-    <div v-if="loading" class="loading-grid">
-      <div v-for="i in 6" :key="i" class="skeleton-card"></div>
+    <div v-if="loading" class="matrix-grid">
+      <div v-for="i in 6" :key="i" class="brutal-skeleton"></div>
     </div>
 
-    <div v-else-if="projects.length === 0" class="empty-state">
-      <svg viewBox="0 0 64 64" width="72" height="72" fill="none">
-        <circle cx="32" cy="32" r="28" fill="#f1f5f9"/>
-        <path d="M20 40V28a2 2 0 012-2h6l2 2h12a2 2 0 012 2v10a2 2 0 01-2 2H22a2 2 0 01-2-2z" stroke="#94a3b8" stroke-width="2" fill="none"/>
-      </svg>
-      <h3>暂无项目</h3>
-      <p>创建您的第一个项目开始质量监控</p>
-      <button class="primary-btn" @click="showCreateDialog = true">创建项目</button>
+    <div v-else-if="projects.length === 0" class="terminal-empty-state">
+      <div class="empty-glitch">[ DIRECTORY_EMPTY ]</div>
+      <p class="empty-subtext">SYSTEM REQUIRES A NEW PROJECT ENTITY TO COMMENCE TELEMETRY.</p>
+      <button class="brutal-btn outline" @click="showCreateDialog = true">
+        ALLOCATE_NEW_WORKSPACE
+      </button>
     </div>
 
-    <div v-else class="project-grid">
+    <div v-else class="matrix-grid">
       <div
         v-for="project in projects"
         :key="project.id"
-        class="project-card"
+        class="brutal-project-card"
         @click="router.push(`/project/${project.id}`)"
       >
-        <div class="project-card-header">
-          <div class="project-avatar">{{ getInitials(project.name) }}</div>
-          <div class="project-meta">
+        <div class="card-top-bar">
+          <span class="hex-id">ID: 0x{{ String(project.id).padStart(4, '0') }}</span>
+          <span class="date-badge">{{ formatDate(project.createTime) }}</span>
+        </div>
+        
+        <div class="card-body">
+          <div class="avatar-block">[{{ getInitials(project.name) }}]</div>
+          <div class="project-info">
             <h3 class="project-name">{{ project.name }}</h3>
-            <span class="project-date">{{ formatDate(project.createTime) }}</span>
+            <p class="project-desc">{{ project.description || 'NO_DESCRIPTION_PROVIDED' }}</p>
           </div>
         </div>
-        <p class="project-desc">{{ project.description || '暂无描述' }}</p>
-        <div class="project-stats">
-          <div class="project-stat">
-            <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/></svg>
-            <span>{{ project.fileCount || 0 }} 个文件</span>
+        
+        <div class="card-footer">
+          <div class="stat-block">
+            <span class="stat-label">FILES:</span>
+            <span class="stat-value">{{ project.fileCount || 0 }}</span>
           </div>
-        </div>
-        <div class="project-actions" @click.stop>
-          <button class="action-btn primary" @click="router.push(`/project/${project.id}`)">查看详情</button>
-          <button class="action-btn danger" @click="handleDelete(project.id)">删除</button>
+          <div class="actions" @click.stop>
+            <button class="brutal-icon-btn text-accent" @click="router.push(`/project/${project.id}`)">ENTER</button>
+            <button class="brutal-icon-btn text-danger" @click="handleDelete(project.id)">PURGE</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Create Dialog -->
-    <el-dialog v-model="showCreateDialog" title="新建项目" width="480px" :close-on-click-modal="false" border-radius="16px">
-      <el-form :model="createForm" label-width="88px" style="padding: 8px 0">
-        <el-form-item label="项目名称">
-          <el-input v-model="createForm.name" placeholder="请输入项目名称" size="large" />
+    <el-dialog 
+      v-model="showCreateDialog" 
+      title="ALLOCATE_NEW_ENTITY" 
+      width="500px" 
+      :close-on-click-modal="false" 
+      class="brutal-dialog"
+    >
+      <el-form :model="createForm" label-position="top" class="brutal-form">
+        <el-form-item label="ENTITY_NAME (项目名称)">
+          <div class="input-wrapper">
+            <span class="input-prefix">NAME></span>
+            <el-input v-model="createForm.name" placeholder="AWAITING_INPUT..." size="large" class="brutal-input" />
+          </div>
         </el-form-item>
-        <el-form-item label="项目描述">
-          <el-input v-model="createForm.description" type="textarea" :rows="3" placeholder="请输入项目描述（可选）" />
+        <el-form-item label="PARAMETERS (项目描述)">
+          <div class="input-wrapper textarea-wrapper">
+            <el-input v-model="createForm.description" type="textarea" :rows="3" placeholder="OPTIONAL_PARAMETERS..." class="brutal-input" />
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <button class="cancel-btn" @click="showCreateDialog = false">取消</button>
-          <button class="primary-btn" :disabled="creating" @click="handleCreate">
+          <button class="brutal-btn outline-muted" @click="showCreateDialog = false">ABORT</button>
+          <button class="brutal-btn primary" :disabled="creating" @click="handleCreate">
             <span class="btn-spinner" v-if="creating"></span>
-            {{ creating ? '创建中...' : '确认创建' }}
+            {{ creating ? 'ALLOCATING...' : 'CONFIRM_EXECUTION' }}
           </button>
         </div>
       </template>
@@ -132,127 +145,335 @@ function getInitials(name: string) {
 </script>
 
 <style scoped>
-.page { display: flex; flex-direction: column; gap: 20px; }
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+.terminal-page {
+  --bg-dark: #090a0f;
+  --bg-panel: #11131a;
+  --bg-card: #161922;
+  --clr-accent: #ccff00;
+  --clr-danger: #ff3366;
+  --clr-text-main: #ffffff;
+  --clr-text-muted: #6b7280;
+  --clr-border: #272a35;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  font-family: 'Space Mono', monospace;
+  color: var(--clr-text-main);
+}
 
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 2px solid var(--clr-border);
+  padding-bottom: 1.5rem;
 }
 
-.page-title {
-  font-size: 20px; font-weight: 800; color: #1e293b; margin: 0;
+.header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.primary-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 10px 18px; background: linear-gradient(135deg, #4f8cff, #a259ff);
-  border: none; border-radius: 10px; color: #fff;
-  font-size: 14px; font-weight: 600; cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
+.blinking-cursor {
+  font-size: 2rem;
+  color: var(--clr-accent);
+  animation: blink 1s step-end infinite;
 }
 
-.primary-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-.primary-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+@keyframes blink { 50% { opacity: 0; } }
 
-.loading-grid, .project-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+.display-title {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--clr-text-main);
+  margin: 0;
+  letter-spacing: 0.05em;
 }
 
-.skeleton-card {
-  height: 180px; background: #f1f5f9; border-radius: 14px;
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-.empty-state {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 80px 20px; gap: 12px; text-align: center;
-  background: #fff; border-radius: 16px; border: 2px dashed #e2e8f0;
-}
-
-.empty-state h3 { font-size: 16px; font-weight: 700; color: #334155; margin: 0; }
-.empty-state p { font-size: 14px; color: #94a3b8; margin: 0 0 8px 0; }
-
-.project-card {
-  background: #fff;
-  border-radius: 14px;
-  padding: 20px;
-  border: 1px solid #f0f4f8;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+/* 硬核按钮组件 */
+.brutal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
-  display: flex; flex-direction: column; gap: 12px;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.project-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(79,140,255,0.1);
-  border-color: rgba(79,140,255,0.3);
+.brutal-btn.primary {
+  background: var(--clr-text-main);
+  color: var(--bg-dark);
+  box-shadow: 4px 4px 0px var(--clr-accent);
 }
 
-.project-card-header { display: flex; align-items: center; gap: 12px; }
-
-.project-avatar {
-  width: 44px; height: 44px; border-radius: 12px;
-  background: linear-gradient(135deg, #4f8cff, #a259ff);
-  color: #fff; font-size: 14px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+.brutal-btn.primary:hover:not(:disabled) {
+  background: var(--clr-accent);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px var(--clr-accent);
 }
 
-.project-meta { flex: 1; min-width: 0; }
+.brutal-btn.primary:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px transparent;
+}
+
+.brutal-btn.outline {
+  background: transparent;
+  border: 1px solid var(--clr-accent);
+  color: var(--clr-accent);
+  box-shadow: 4px 4px 0px rgba(204, 255, 0, 0.2);
+}
+
+.brutal-btn.outline:hover {
+  background: rgba(204, 255, 0, 0.1);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px rgba(204, 255, 0, 0.2);
+}
+
+.brutal-btn.outline-muted {
+  background: transparent;
+  border: 1px solid var(--clr-border);
+  color: var(--clr-text-muted);
+}
+.brutal-btn.outline-muted:hover {
+  border-color: var(--clr-text-main);
+  color: var(--clr-text-main);
+}
+
+.brutal-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* 网格布局 */
+.matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.5rem;
+}
+
+.brutal-skeleton {
+  height: 200px;
+  background: repeating-linear-gradient(45deg, var(--bg-card), var(--bg-card) 10px, var(--bg-panel) 10px, var(--bg-panel) 20px);
+  border: 1px solid var(--clr-border);
+  opacity: 0.5;
+  animation: pulse-slow 2s infinite;
+}
+
+@keyframes pulse-slow { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+
+/* 空状态 */
+.terminal-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: var(--bg-card);
+  border: 1px dashed var(--clr-border);
+  text-align: center;
+}
+
+.empty-glitch {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 2rem;
+  color: var(--clr-text-muted);
+  margin-bottom: 1rem;
+}
+
+.empty-subtext {
+  font-size: 0.85rem;
+  color: var(--clr-text-muted);
+  margin-bottom: 2rem;
+}
+
+/* 项目卡片 */
+.brutal-project-card {
+  background: var(--bg-card);
+  border: 1px solid var(--clr-border);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.brutal-project-card::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: -1px;
+  width: 0; height: 3px;
+  background: var(--clr-accent);
+  transition: width 0.3s ease;
+}
+
+.brutal-project-card:hover {
+  border-color: var(--clr-text-muted);
+  transform: translateY(-4px);
+  box-shadow: 8px 8px 0px rgba(0,0,0,0.5);
+}
+
+.brutal-project-card:hover::before { width: calc(100% + 2px); }
+
+.card-top-bar {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background: var(--bg-dark);
+  border-bottom: 1px solid var(--clr-border);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--clr-text-muted);
+}
+
+.card-body {
+  padding: 1.5rem 1rem;
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+}
+
+.avatar-block {
+  width: 48px;
+  height: 48px;
+  background: var(--bg-dark);
+  border: 1px solid var(--clr-text-main);
+  color: var(--clr-text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: 3px 3px 0px var(--clr-text-main);
+  flex-shrink: 0;
+}
+
+.brutal-project-card:hover .avatar-block {
+  border-color: var(--clr-accent);
+  color: var(--clr-accent);
+  box-shadow: 3px 3px 0px var(--clr-accent);
+}
+
+.project-info { flex: 1; min-width: 0; }
 
 .project-name {
-  font-size: 15px; font-weight: 700; color: #1e293b;
-  margin: 0 0 3px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1.25rem;
+  color: var(--clr-text-main);
+  margin: 0 0 0.5rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-.project-date { font-size: 12px; color: #94a3b8; }
 
 .project-desc {
-  font-size: 13px; color: #64748b; line-height: 1.5; margin: 0;
-  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 0.8rem;
+  color: var(--clr-text-muted);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.project-stats { display: flex; gap: 16px; }
-
-.project-stat {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 12px; color: #94a3b8;
+.card-footer {
+  padding: 1rem;
+  border-top: 1px dashed var(--clr-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.project-actions {
-  display: flex; gap: 8px; margin-top: 4px;
+.stat-block {
+  font-size: 0.8rem;
+  color: var(--clr-text-muted);
 }
 
-.action-btn {
-  flex: 1; padding: 8px 0; border-radius: 8px; border: none;
-  font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+.stat-value {
+  color: var(--clr-text-main);
+  font-weight: 700;
+  margin-left: 4px;
 }
 
-.action-btn.primary { background: #eff6ff; color: #3b82f6; }
-.action-btn.primary:hover { background: #3b82f6; color: #fff; }
-.action-btn.danger { background: #fef2f2; color: #ef4444; }
-.action-btn.danger:hover { background: #ef4444; color: #fff; }
+.actions { display: flex; gap: 1rem; }
 
-.dialog-footer { display: flex; justify-content: flex-end; gap: 10px; }
-
-.cancel-btn {
-  padding: 9px 18px; border-radius: 8px;
-  border: 1px solid #e2e8f0; background: #fff;
-  color: #64748b; font-size: 14px; cursor: pointer; transition: all 0.2s;
+.brutal-icon-btn {
+  background: transparent;
+  border: none;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
-.cancel-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
+.text-accent { color: var(--clr-text-muted); }
+.text-accent:hover { color: var(--clr-accent); }
+.text-danger { color: var(--clr-text-muted); }
+.text-danger:hover { color: var(--clr-danger); }
 
+/* 深度定制的 Dialog 样式 */
+:deep(.el-dialog) {
+  background: #11131a !important;
+  border: 1px solid #272a35 !important;
+  border-radius: 0 !important;
+  box-shadow: 16px 16px 0px rgba(0,0,0,0.8) !important;
+}
+:deep(.el-dialog__title) {
+  font-family: 'Space Mono', monospace !important;
+  color: #ccff00 !important;
+  font-weight: 700 !important;
+}
+:deep(.el-form-item__label) {
+  color: #6b7280 !important;
+  font-family: 'Space Mono', monospace !important;
+  font-size: 0.8rem !important;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #090a0f;
+  border: 1px solid #272a35;
+  transition: all 0.2s ease;
+}
+.input-wrapper:focus-within {
+  border-color: #ccff00;
+  box-shadow: 4px 4px 0px rgba(204, 255, 0, 0.15);
+}
+.input-prefix {
+  padding-left: 1rem;
+  font-size: 0.85rem;
+  color: #ccff00;
+  user-select: none;
+}
+.brutal-input :deep(.el-input__wrapper), .brutal-input :deep(.el-textarea__inner) {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+  font-family: 'Space Mono', monospace !important;
+  border-radius: 0 !important;
+}
+.textarea-wrapper { padding: 0.5rem; }
+
+.dialog-footer { display: flex; justify-content: flex-end; gap: 1rem; }
 .btn-spinner {
-  width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite;
-  display: inline-block;
+  width: 14px; height: 14px; border: 2px solid #090a0f;
+  border-top-color: transparent; border-radius: 50%;
+  animation: spin 0.6s linear infinite; display: inline-block;
 }
-
-@keyframes spin { to { transform: rotate(360deg); } }
 </style>

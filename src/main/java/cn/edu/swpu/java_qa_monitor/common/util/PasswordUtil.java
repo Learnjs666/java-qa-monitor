@@ -16,4 +16,5 @@ public class PasswordUtil {
     public static boolean matches(String rawPassword, String encodedPassword) {
         return ENCODER.matches(rawPassword, encodedPassword);
     }
+
 }

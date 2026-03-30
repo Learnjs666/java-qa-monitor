@@ -50,4 +50,5 @@ public class
         List<SysUser> list = sysUserService.list();
         return Result.success(list);
     }
+
 }

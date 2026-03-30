@@ -48,6 +48,11 @@ const router = createRouter({
           path: 'rules',
           name: 'RuleConfig',
           component: () => import('../views/setting/RuleConfigView.vue')
+        },
+        {
+          path: 'users',
+          name: 'UserManagement',
+          component: () => import('../views/setting/UserManagementView.vue')
         }
       ]
     }

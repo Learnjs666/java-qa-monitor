@@ -1,87 +1,82 @@
 <template>
-  <div class="page">
-    <!-- Back Button & Header -->
-    <div class="page-header">
-      <button class="back-btn" @click="router.back()">
-        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-          <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
-        </svg>
-        返回
-      </button>
-      <h2 class="page-title">{{ project?.name || '项目详情' }}</h2>
-      <button class="primary-btn" @click="handleScan" :disabled="scanning">
-        <span class="btn-spinner" v-if="scanning"></span>
-        <svg v-else viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-          <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
-        </svg>
-        {{ scanning ? '扫描中...' : '触发扫描' }}
-      </button>
-    </div>
-
-    <!-- Project Info -->
-    <div class="info-grid">
-      <div class="info-card" v-for="item in projectInfoItems" :key="item.label">
-        <div class="info-icon" v-html="item.icon"></div>
-        <div>
-          <div class="info-label">{{ item.label }}</div>
-          <div class="info-value">{{ item.value }}</div>
+  <div class="terminal-page">
+    <div class="brutal-header">
+      <div class="header-left">
+        <button class="brutal-back-btn" @click="router.back()">
+          <span class="arrow"><</span> BACK
+        </button>
+        <div class="target-info">
+          <span class="target-label">TARGET_NODE //</span>
+          <h2 class="display-title">{{ project?.name || 'AWAITING_DATA' }}</h2>
         </div>
       </div>
+      
+      <button class="brutal-btn primary" @click="handleScan" :disabled="scanning">
+        <span class="btn-spinner" v-if="scanning"></span>
+        <span class="btn-text">{{ scanning ? 'EXECUTING_SCAN...' : 'INITIATE_SCAN' }}</span>
+        <span class="btn-icon" v-if="!scanning">></span>
+      </button>
     </div>
 
-    <!-- File Upload -->
-    <div class="section-card">
-      <div class="section-header">
-        <h3 class="section-title">上传文件</h3>
-        <span class="hint-text">支持 .java 文件和 .zip 压缩包</span>
+    <div class="info-bento">
+      <div class="brutal-info-card" v-for="item in projectInfoItems" :key="item.label">
+        <div class="card-top">
+          <span class="info-icon" v-html="item.icon"></span>
+          <span class="info-label">[ {{ item.label }} ]</span>
+        </div>
+        <div class="info-value">{{ item.value }}</div>
       </div>
-      <FileUpload :project-id="projectId" @uploaded="loadProject" />
     </div>
 
-    <!-- Scan Tasks -->
-    <div class="section-card">
-      <div class="section-header">
-        <h3 class="section-title">扫描记录</h3>
-        <button class="icon-btn" @click="loadTasks" title="刷新">
-          <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
-          </svg>
-          刷新
+    <div class="brutal-section">
+      <div class="section-top-bar">
+        <span class="bar-title">MODULE: FILE_UPLOAD</span>
+        <span class="bar-status">AWAITING_INPUT</span>
+      </div>
+      <div class="section-content">
+        <p class="hint-text">SUPPORTED_FORMATS: .JAVA | .ZIP</p>
+        <FileUpload :project-id="projectId" @uploaded="loadProject" />
+      </div>
+    </div>
+
+    <div class="brutal-section">
+      <div class="section-top-bar">
+        <span class="bar-title">MODULE: SCAN_TELEMETRY</span>
+        <button class="brutal-text-btn" @click="loadTasks" title="REFRESH">
+          [ REFRESH_LOGS ]
         </button>
       </div>
 
-      <div v-if="tasksLoading" class="loading-rows">
-        <div v-for="i in 4" :key="i" class="skeleton-row"></div>
-      </div>
+      <div class="section-content no-padding">
+        <div v-if="tasksLoading" class="log-rows-container">
+          <div v-for="i in 4" :key="i" class="log-skeleton"></div>
+        </div>
 
-      <div v-else-if="tasks.length === 0" class="empty-state">
-        <svg viewBox="0 0 48 48" width="48" height="48" fill="none">
-          <circle cx="24" cy="24" r="20" fill="#f1f5f9"/>
-          <path d="M16 32V20a2 2 0 012-2h12a2 2 0 012 2v12" stroke="#94a3b8" stroke-width="2" fill="none"/>
-          <path d="M12 32h24" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span>暂无扫描记录，点击「触发扫描」开始</span>
-      </div>
+        <div v-else-if="tasks.length === 0" class="log-empty">
+          <span class="blink">_</span> NO_TELEMETRY_DATA_FOUND. INITIATE SCAN TO BEGIN.
+        </div>
 
-      <div v-else class="task-list">
-        <div v-for="task in tasks" :key="task.id" class="task-row">
-          <div class="task-id">#{{ task.id }}</div>
-          <div class="task-status">
-            <span class="status-badge" :class="task.status.toLowerCase()">
-              <span class="status-dot"></span>
-              {{ statusLabel(task.status) }}
-            </span>
-          </div>
-          <div class="task-info">
-            <span>{{ task.fileCount || 0 }} 文件</span>
-            <span class="divider">·</span>
-            <span>{{ task.issueCount || 0 }} 问题</span>
-            <span class="divider">·</span>
-            <span>{{ formatDate(task.createTime) }}</span>
-          </div>
-          <div class="task-actions">
-            <button class="task-btn blue" @click="router.push(`/scan/${task.id}`)">查看指标</button>
-            <button class="task-btn orange" @click="router.push(`/issues/${task.id}`)">查看问题</button>
+        <div v-else class="log-list">
+          <div v-for="task in tasks" :key="task.id" class="log-row">
+            <div class="log-col id-col">#{{ String(task.id).padStart(4, '0') }}</div>
+            
+            <div class="log-col status-col">
+              <span class="brutal-badge" :class="task.status.toLowerCase()">
+                <span class="dot"></span>
+                {{ statusLabel(task.status) }}
+              </span>
+            </div>
+
+            <div class="log-col meta-col">
+              <div class="meta-item"><span>FILES:</span> {{ task.fileCount || 0 }}</div>
+              <div class="meta-item"><span>ISSUES:</span> <span :class="{'text-danger': task.issueCount > 0}">{{ task.issueCount || 0 }}</span></div>
+              <div class="meta-item"><span>TS:</span> {{ formatDate(task.createTime) }}</div>
+            </div>
+
+            <div class="log-col action-col">
+              <button class="brutal-action-link" @click="router.push(`/scan/${task.id}`)">VIEW_METRICS</button>
+              <button class="brutal-action-link text-warning" @click="router.push(`/issues/${task.id}`)">DEBUG_ISSUES</button>
+            </div>
           </div>
         </div>
       </div>
@@ -157,7 +152,7 @@ async function handleScan() {
 }
 
 function statusLabel(s: string) {
-  return { PENDING: '等待中', RUNNING: '扫描中', COMPLETED: '已完成', FAILED: '失败' }[s] || s
+  return { PENDING: 'PNDG', RUNNING: 'EXEC', COMPLETED: 'DONE', FAILED: 'FAIL' }[s] || s
 }
 
 function formatDate(date: string) {
@@ -166,149 +161,270 @@ function formatDate(date: string) {
 </script>
 
 <style scoped>
-.page { display: flex; flex-direction: column; gap: 20px; }
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@400;500;700&display=swap');
 
-.page-header {
-  display: flex; align-items: center; gap: 16px;
+.terminal-page {
+  --bg-dark: #090a0f;
+  --bg-panel: #11131a;
+  --bg-card: #161922;
+  --clr-accent: #ccff00;
+  --clr-success: #00e5ff;
+  --clr-warning: #ffaa00;
+  --clr-danger: #ff3366;
+  --clr-text-main: #ffffff;
+  --clr-text-muted: #6b7280;
+  --clr-border: #272a35;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  font-family: 'Space Mono', monospace;
+  color: var(--clr-text-main);
 }
 
-.page-title { font-size: 20px; font-weight: 800; color: #1e293b; margin: 0; flex: 1; }
-
-.back-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 8px 14px; border-radius: 8px;
-  border: 1px solid #e2e8f0; background: #fff;
-  color: #64748b; font-size: 13px; font-weight: 500; cursor: pointer;
-  transition: all 0.2s;
+.brutal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--clr-border);
+  padding-bottom: 1.5rem;
 }
 
-.back-btn:hover { background: #f8fafc; color: #334155; }
-
-.primary-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 10px 18px; background: linear-gradient(135deg, #4f8cff, #a259ff);
-  border: none; border-radius: 10px; color: #fff;
-  font-size: 14px; font-weight: 600; cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
 }
 
-.primary-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-.primary-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+.brutal-back-btn {
+  background: transparent;
+  border: none;
+  color: var(--clr-text-muted);
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+}
+
+.brutal-back-btn:hover { color: var(--clr-text-main); }
+.brutal-back-btn .arrow { color: var(--clr-accent); }
+
+.target-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.target-label {
+  font-size: 0.75rem;
+  color: var(--clr-text-muted);
+  font-weight: 700;
+}
+
+.display-title {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--clr-text-main);
+  margin: 0;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* 按钮样式复用 */
+.brutal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.brutal-btn.primary {
+  background: var(--clr-text-main);
+  color: var(--bg-dark);
+  box-shadow: 4px 4px 0px var(--clr-accent);
+}
+
+.brutal-btn.primary:hover:not(:disabled) {
+  background: var(--clr-accent);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px var(--clr-accent);
+}
+
+.brutal-btn.primary:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px transparent;
+}
+
+.brutal-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
 .btn-spinner {
-  width: 14px; height: 14px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: white; border-radius: 50%;
-  animation: spin 0.7s linear infinite; display: inline-block;
+  width: 14px; height: 14px; border: 2px solid var(--bg-dark);
+  border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite;
 }
-
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.info-grid {
+/* 信息矩阵 */
+.info-bento {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
 }
 
-.info-card {
-  background: #fff; border-radius: 12px; padding: 18px;
-  display: flex; align-items: flex-start; gap: 12px;
-  border: 1px solid #f0f4f8; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+.brutal-info-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--clr-border);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.brutal-info-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--clr-text-muted);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .info-icon {
-  width: 38px; height: 38px; border-radius: 10px;
-  background: #eff6ff; color: #3b82f6; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
+  color: var(--clr-text-muted);
+  display: flex;
+  align-items: center;
+}
+.info-icon :deep(svg) { width: 16px; height: 16px; }
+
+.info-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--clr-text-muted);
 }
 
-.info-icon :deep(svg) { width: 18px; height: 18px; }
-
-.info-label { font-size: 11px; color: #94a3b8; font-weight: 500; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-.info-value { font-size: 13px; color: #1e293b; font-weight: 600; word-break: break-all; }
-
-.section-card {
-  background: #fff; border-radius: 16px; padding: 24px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05); border: 1px solid #f0f4f8;
+.info-value {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--clr-text-main);
+  word-break: break-all;
+  padding-left: 26px;
 }
 
-.section-header {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+/* 模块容器 */
+.brutal-section {
+  background: var(--bg-panel);
+  border: 1px solid var(--clr-border);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 8px 8px 0px rgba(0,0,0,0.3);
 }
 
-.section-title { font-size: 15px; font-weight: 700; color: #1e293b; margin: 0; }
-.hint-text { font-size: 12px; color: #94a3b8; }
-
-.icon-btn {
-  display: flex; align-items: center; gap: 5px;
-  padding: 7px 12px; border-radius: 8px;
-  border: 1px solid #e2e8f0; background: #f8fafc;
-  color: #64748b; font-size: 12px; cursor: pointer; transition: all 0.2s;
+.section-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-dark);
+  border-bottom: 1px solid var(--clr-border);
 }
 
-.icon-btn:hover { background: #eff6ff; border-color: #bfdbfe; color: #3b82f6; }
+.bar-title { font-weight: 700; font-size: 0.85rem; }
+.bar-status { color: var(--clr-text-muted); font-size: 0.75rem; }
 
-.loading-rows { display: flex; flex-direction: column; gap: 10px; }
+.brutal-text-btn {
+  background: transparent;
+  border: none;
+  color: var(--clr-accent);
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.brutal-text-btn:hover { color: var(--clr-text-main); }
 
-.skeleton-row {
-  height: 52px; background: #f1f5f9; border-radius: 10px;
-  animation: pulse 1.5s ease-in-out infinite;
+.section-content { padding: 1.5rem; }
+.section-content.no-padding { padding: 0; }
+
+.hint-text {
+  font-size: 0.75rem;
+  color: var(--clr-text-muted);
+  margin: 0 0 1rem 0;
 }
 
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-.empty-state {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 40px; gap: 10px; color: #94a3b8; font-size: 13px;
+/* 终端日志列表 */
+.log-empty {
+  padding: 3rem;
+  text-align: center;
+  color: var(--clr-text-muted);
+  font-size: 0.85rem;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.2), rgba(0,0,0,0.2) 1px, transparent 1px, transparent 2px);
 }
+.blink { animation: blink 1s step-end infinite; }
 
-.task-list { display: flex; flex-direction: column; gap: 8px; }
+.log-list { display: flex; flex-direction: column; }
 
-.task-row {
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 18px; border-radius: 10px;
-  background: #f8fafc; border: 1px solid #f0f4f8;
-  transition: all 0.2s;
+.log-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px dashed var(--clr-border);
+  padding: 1rem 1.5rem;
+  transition: background 0.2s;
 }
+.log-row:hover { background: var(--bg-card); }
+.log-row:last-child { border-bottom: none; }
 
-.task-row:hover { background: #eff6ff; border-color: #bfdbfe; }
+.log-col { flex-shrink: 0; }
 
-.task-id { font-size: 12px; font-weight: 600; color: #94a3b8; width: 40px; flex-shrink: 0; }
+.id-col { width: 80px; color: var(--clr-text-muted); font-weight: 700; }
 
-.task-status { flex-shrink: 0; }
-
-.status-badge {
-  display: flex; align-items: center; gap: 5px;
-  padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+.status-col { width: 120px; }
+.brutal-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 8px; border: 1px solid currentColor;
+  font-size: 0.7rem; font-weight: 700;
 }
+.dot { width: 6px; height: 6px; background: currentColor; }
 
-.status-dot {
-  width: 6px; height: 6px; border-radius: 50%;
+.brutal-badge.pending { color: var(--clr-text-muted); }
+.brutal-badge.running { color: var(--clr-warning); animation: pulse-border 1.5s infinite; }
+.brutal-badge.completed { color: var(--clr-success); }
+.brutal-badge.failed { color: var(--clr-danger); }
+
+@keyframes pulse-border { 0%, 100% { border-color: rgba(255, 170, 0, 0.3); } 50% { border-color: var(--clr-warning); } }
+
+.meta-col {
+  flex: 1; display: flex; gap: 2rem; font-size: 0.8rem; color: var(--clr-text-main);
 }
+.meta-item span:first-child { color: var(--clr-text-muted); margin-right: 4px; }
+.text-danger { color: var(--clr-danger); font-weight: 700; }
 
-.status-badge.pending { background: #f1f5f9; color: #64748b; }
-.status-badge.pending .status-dot { background: #94a3b8; }
-.status-badge.running { background: #fffbeb; color: #d97706; }
-.status-badge.running .status-dot { background: #f59e0b; animation: blink 1s ease-in-out infinite; }
-.status-badge.completed { background: #f0fdf4; color: #16a34a; }
-.status-badge.completed .status-dot { background: #22c55e; }
-.status-badge.failed { background: #fef2f2; color: #dc2626; }
-.status-badge.failed .status-dot { background: #ef4444; }
+.action-col { display: flex; gap: 1.5rem; }
 
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-.task-info { flex: 1; font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px; }
-.divider { color: #cbd5e1; }
-
-.task-actions { display: flex; gap: 8px; flex-shrink: 0; }
-
-.task-btn {
-  padding: 6px 12px; border-radius: 7px; border: none;
-  font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+.brutal-action-link {
+  background: transparent; border: none; font-family: 'Space Mono', monospace;
+  font-size: 0.75rem; font-weight: 700; cursor: pointer; color: var(--clr-text-muted);
+  text-decoration: underline; text-underline-offset: 4px;
 }
+.brutal-action-link:hover { color: var(--clr-text-main); }
+.brutal-action-link.text-warning:hover { color: var(--clr-warning); }
 
-.task-btn.blue { background: #eff6ff; color: #3b82f6; }
-.task-btn.blue:hover { background: #3b82f6; color: #fff; }
-.task-btn.orange { background: #fffbeb; color: #d97706; }
-.task-btn.orange:hover { background: #f59e0b; color: #fff; }
+/* 骨架屏 */
+.log-rows-container { padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+.log-skeleton { height: 40px; background: var(--bg-card); opacity: 0.5; animation: pulse-slow 2s infinite; }
 </style>

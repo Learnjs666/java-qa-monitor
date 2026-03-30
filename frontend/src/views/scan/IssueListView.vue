@@ -1,108 +1,89 @@
 <template>
-  <div class="page">
+  <div class="terminal-page">
     <div class="page-header">
-      <button class="back-btn" @click="router.back()">
-        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-          <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
-        </svg>
-        返回
-      </button>
-      <h2 class="page-title">问题列表 <span class="task-id-badge">#{{ taskId }}</span></h2>
+      <div class="header-left">
+        <button class="brutal-back-btn" @click="router.back()">
+          <span class="arrow"><</span> BACK
+        </button>
+        <div class="header-title-group">
+          <h2 class="display-title">ISSUE_TRACKER</h2>
+          <span class="task-id-badge">TASK_#{{ taskId }}</span>
+          <span class="blinking-cursor">_</span>
+        </div>
+      </div>
 
-      <!-- Filter Buttons -->
-      <div class="filter-tabs">
+      <div class="brutal-filter-tabs">
         <button
           v-for="tab in tabs"
           :key="tab.value"
-          class="filter-tab"
-          :class="{ active: activeFilter === tab.value }"
+          class="brutal-filter-tab"
+          :class="[{ active: activeFilter === tab.value }, tab.value.toLowerCase()]"
           @click="activeFilter = tab.value"
         >
-          <span class="tab-dot" :class="tab.value.toLowerCase()"></span>
-          {{ tab.label }}
+          <span class="tab-label">[ {{ tab.value === 'ALL' ? 'GLOBAL' : tab.label }} ]</span>
           <span class="tab-count">{{ tabCount(tab.value) }}</span>
         </button>
       </div>
     </div>
 
-    <!-- Search & Stats -->
     <div class="toolbar">
-      <div class="search-wrap">
-        <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14" class="search-icon">
-          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
-        </svg>
-        <input v-model="searchText" class="search-input" placeholder="搜索文件名或描述..." />
+      <div class="brutal-search-wrap">
+        <span class="search-prefix">QUERY></span>
+        <input v-model="searchText" class="brutal-search-input" placeholder="INPUT_FILE_OR_DESC..." />
       </div>
+      
       <div class="stats-row">
-        <span class="stat-chip error">
-          <span>错误</span>
-          <strong>{{ tabCount('ERROR') }}</strong>
+        <span class="brutal-stat-chip error">
+          <span class="chip-label">ERRORS</span>
+          <strong class="chip-val">{{ tabCount('ERROR') }}</strong>
         </span>
-        <span class="stat-chip warning">
-          <span>警告</span>
-          <strong>{{ tabCount('WARNING') }}</strong>
+        <span class="brutal-stat-chip warning">
+          <span class="chip-label">WARNINGS</span>
+          <strong class="chip-val">{{ tabCount('WARNING') }}</strong>
         </span>
-        <span class="stat-chip info">
-          <span>提示</span>
-          <strong>{{ tabCount('INFO') }}</strong>
+        <span class="brutal-stat-chip info">
+          <span class="chip-label">INFO</span>
+          <strong class="chip-val">{{ tabCount('INFO') }}</strong>
         </span>
       </div>
     </div>
 
-    <!-- Issues List -->
-    <div class="section-card">
-      <div v-if="loading" class="loading-rows">
-        <div v-for="i in 6" :key="i" class="skeleton-row"></div>
+    <div class="brutal-panel">
+      <div v-if="loading" class="terminal-loading">
+        <div v-for="i in 6" :key="i" class="brutal-skeleton-row"></div>
       </div>
 
-      <div v-else-if="filteredIssues.length === 0" class="empty-state">
-        <svg viewBox="0 0 48 48" width="48" height="48" fill="none">
-          <circle cx="24" cy="24" r="20" fill="#f0fdf4"/>
-          <path d="M16 24l5 5 11-11" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>太棒了！没有发现任何问题</span>
+      <div v-else-if="filteredIssues.length === 0" class="terminal-empty">
+        <div class="empty-glitch">[ SYSTEM_CLEAR ]</div>
+        <span>NO_ANOMALIES_DETECTED. ALL_SYSTEMS_NOMINAL.</span>
       </div>
 
-      <div v-else class="issues-list">
+      <div v-else class="issues-log-stream">
         <div
           v-for="issue in filteredIssues"
           :key="issue.id"
-          class="issue-row"
+          class="brutal-issue-row"
           :class="issue.severity.toLowerCase()"
         >
           <div class="issue-severity">
-            <span class="severity-icon" :class="issue.severity.toLowerCase()">
-              <!-- ERROR icon -->
-              <svg v-if="issue.severity === 'ERROR'" viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-              </svg>
-              <!-- WARNING icon -->
-              <svg v-else-if="issue.severity === 'WARNING'" viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
-                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-              </svg>
-              <!-- INFO icon -->
-              <svg v-else viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-              </svg>
+            <span class="severity-square" :class="issue.severity.toLowerCase()">
+              {{ issue.severity === 'ERROR' ? 'ERR' : issue.severity === 'WARNING' ? 'WRN' : 'INF' }}
             </span>
           </div>
 
           <div class="issue-main">
             <div class="issue-top">
               <span class="issue-file">{{ issue.fileName }}</span>
-              <span class="issue-line">第 {{ issue.lineNumber }} 行</span>
+              <span class="issue-line">LN: {{ issue.lineNumber }}</span>
             </div>
-            <div class="issue-message">{{ issue.message }}</div>
+            <div class="issue-message">> {{ issue.message }}</div>
             <div class="issue-rule">
-              <svg viewBox="0 0 20 20" fill="currentColor" width="12" height="12">
-                <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
-              </svg>
-              {{ issue.ruleCode }}
+              <span class="rule-prefix">RULE_VIOLATION:</span> {{ issue.ruleCode }}
             </div>
           </div>
 
           <div class="issue-badge">
-            <span class="severity-badge" :class="issue.severity.toLowerCase()">
+            <span class="brutal-severity-badge" :class="issue.severity.toLowerCase()">
               {{ severityLabel(issue.severity) }}
             </span>
           </div>
@@ -163,165 +144,153 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page { display: flex; flex-direction: column; gap: 20px; }
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@400;500;700&display=swap');
 
-.page-header {
-  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+.terminal-page {
+  --bg-dark: #090a0f;
+  --bg-panel: #11131a;
+  --bg-card: #161922;
+  --clr-accent: #ccff00;
+  --clr-success: #00e5ff;
+  --clr-warning: #ffaa00;
+  --clr-danger: #ff3366;
+  --clr-text-main: #ffffff;
+  --clr-text-muted: #6b7280;
+  --clr-border: #272a35;
+
+  display: flex; flex-direction: column; gap: 2rem;
+  font-family: 'Space Mono', monospace; color: var(--clr-text-main);
 }
 
-.page-title {
-  font-size: 20px; font-weight: 800; color: #1e293b; margin: 0;
-  display: flex; align-items: center; gap: 10px;
+.page-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  border-bottom: 2px solid var(--clr-border); padding-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+}
+
+.header-left { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.brutal-back-btn {
+  background: transparent; border: none; color: var(--clr-text-muted);
+  font-family: 'Space Mono', monospace; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; gap: 8px; transition: color 0.2s;
+  align-self: flex-start;
+}
+.brutal-back-btn:hover { color: var(--clr-text-main); }
+.brutal-back-btn .arrow { color: var(--clr-accent); }
+
+.header-title-group { display: flex; align-items: center; gap: 12px; }
+
+.display-title {
+  font-family: 'Clash Display', sans-serif; font-size: 2rem; font-weight: 700;
+  color: var(--clr-text-main); margin: 0; letter-spacing: 0.05em;
 }
 
 .task-id-badge {
-  font-size: 14px; font-weight: 600; color: #94a3b8;
-  background: #f1f5f9; border-radius: 6px; padding: 2px 8px;
+  background: var(--clr-text-main); color: var(--bg-dark);
+  padding: 2px 8px; font-weight: 700; font-size: 0.85rem;
 }
 
-.back-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 8px 14px; border-radius: 8px;
-  border: 1px solid #e2e8f0; background: #fff;
-  color: #64748b; font-size: 13px; cursor: pointer; transition: all 0.2s;
-}
+.blinking-cursor { font-size: 2rem; color: var(--clr-accent); animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
 
-.back-btn:hover { background: #f8fafc; color: #334155; }
+.brutal-filter-tabs { display: flex; gap: 0.5rem; }
 
-.filter-tabs { display: flex; gap: 6px; margin-left: auto; }
-
-.filter-tab {
-  display: flex; align-items: center; gap: 6px;
-  padding: 7px 14px; border-radius: 8px;
-  border: 1px solid #e2e8f0; background: #fff;
-  color: #64748b; font-size: 13px; font-weight: 500; cursor: pointer;
-  transition: all 0.2s;
-}
-
-.filter-tab:hover { border-color: #93c5fd; color: #3b82f6; }
-.filter-tab.active { background: #eff6ff; border-color: #93c5fd; color: #3b82f6; font-weight: 700; }
-
-.tab-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-}
-
-.tab-dot.error { background: #ef4444; }
-.tab-dot.warning { background: #f59e0b; }
-.tab-dot.info { background: #06b6d4; }
-.tab-dot.all { background: #94a3b8; }
-
-.tab-count {
-  background: #f1f5f9; color: #475569; border-radius: 20px;
-  padding: 1px 7px; font-size: 11px; font-weight: 700;
-}
-
-.filter-tab.active .tab-count { background: #dbeafe; color: #3b82f6; }
-
-.toolbar {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 16px; flex-wrap: wrap;
-}
-
-.search-wrap {
+.brutal-filter-tab {
   display: flex; align-items: center; gap: 8px;
-  border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 14px;
-  background: #fff; transition: border-color 0.2s; min-width: 260px;
+  background: transparent; border: 1px solid var(--clr-border);
+  color: var(--clr-text-muted); font-family: 'Space Mono', monospace;
+  font-size: 0.75rem; font-weight: 700; padding: 0.4rem 0.75rem;
+  cursor: pointer; transition: all 0.2s;
 }
 
-.search-wrap:focus-within { border-color: #93c5fd; }
+.brutal-filter-tab:hover { border-color: var(--clr-text-main); color: var(--clr-text-main); }
+.brutal-filter-tab.active { background: var(--clr-accent); color: #000; border-color: var(--clr-accent); box-shadow: 3px 3px 0px rgba(204,255,0,0.2); transform: translate(-1px, -1px); }
+.brutal-filter-tab.active.error { background: var(--clr-danger); border-color: var(--clr-danger); box-shadow: 3px 3px 0px rgba(255,51,102,0.2); }
+.brutal-filter-tab.active.warning { background: var(--clr-warning); border-color: var(--clr-warning); box-shadow: 3px 3px 0px rgba(255,170,0,0.2); }
+.brutal-filter-tab.active.info { background: var(--clr-success); border-color: var(--clr-success); box-shadow: 3px 3px 0px rgba(0,229,255,0.2); }
 
-.search-icon { color: #94a3b8; flex-shrink: 0; }
+.tab-count { background: rgba(0,0,0,0.2); padding: 1px 6px; font-size: 0.7rem; }
 
-.search-input {
-  border: none; outline: none; background: transparent;
-  font-size: 13px; color: #334155; width: 200px;
+.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+.brutal-search-wrap {
+  display: flex; align-items: center; background: var(--bg-dark);
+  border: 1px solid var(--clr-border); transition: all 0.2s ease; min-width: 300px;
+}
+.brutal-search-wrap:focus-within { border-color: var(--clr-accent); box-shadow: 4px 4px 0px rgba(204,255,0,0.15); }
+.search-prefix { padding: 0 0.75rem; font-size: 0.8rem; color: var(--clr-accent); font-weight: 700; border-right: 1px solid var(--clr-border); }
+.brutal-search-input { border: none; outline: none; background: transparent; color: var(--clr-text-main); font-family: 'Space Mono', monospace; font-size: 0.8rem; padding: 0.5rem 0.75rem; flex: 1; }
+.brutal-search-input::placeholder { color: var(--clr-text-muted); }
+
+.stats-row { display: flex; gap: 1rem; }
+
+.brutal-stat-chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border: 1px solid currentColor;
+  font-size: 0.75rem; font-weight: 700;
+}
+.chip-val { font-family: 'Clash Display', sans-serif; font-size: 1.1rem; }
+.brutal-stat-chip.error { color: var(--clr-danger); background: rgba(255,51,102,0.05); }
+.brutal-stat-chip.warning { color: var(--clr-warning); background: rgba(255,170,0,0.05); }
+.brutal-stat-chip.info { color: var(--clr-success); background: rgba(0,229,255,0.05); }
+
+.brutal-panel {
+  background: var(--bg-panel); border: 1px solid var(--clr-border);
+  box-shadow: 8px 8px 0px rgba(0,0,0,0.5); min-height: 400px;
 }
 
-.stats-row { display: flex; gap: 10px; }
+.terminal-loading { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.brutal-skeleton-row { height: 70px; background: var(--bg-card); opacity: 0.5; border-left: 3px solid var(--clr-border); animation: pulse-slow 2s infinite; }
+@keyframes pulse-slow { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
 
-.stat-chip {
-  display: flex; align-items: center; gap: 6px;
-  padding: 6px 12px; border-radius: 8px;
-  font-size: 12px; font-weight: 500;
-}
-
-.stat-chip strong { font-size: 14px; font-weight: 800; }
-
-.stat-chip.error { background: #fef2f2; color: #ef4444; }
-.stat-chip.warning { background: #fffbeb; color: #d97706; }
-.stat-chip.info { background: #ecfeff; color: #0891b2; }
-
-.section-card {
-  background: #fff; border-radius: 16px; padding: 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05); border: 1px solid #f0f4f8;
-}
-
-.loading-rows { display: flex; flex-direction: column; gap: 8px; }
-.skeleton-row { height: 70px; background: #f1f5f9; border-radius: 10px; animation: pulse 1.5s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-
-.empty-state {
+.terminal-empty {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 56px; gap: 12px; color: #94a3b8; font-size: 14px;
+  padding: 6rem 2rem; color: var(--clr-success); font-size: 0.85rem; text-align: center;
 }
+.empty-glitch { font-family: 'Clash Display', sans-serif; font-size: 2rem; margin-bottom: 1rem; }
 
-.issues-list { display: flex; flex-direction: column; gap: 8px; }
+.issues-log-stream { display: flex; flex-direction: column; }
 
-.issue-row {
-  display: flex; align-items: flex-start; gap: 14px;
-  padding: 14px 16px; border-radius: 10px;
-  border-left: 3px solid transparent; background: #f8fafc;
+.brutal-issue-row {
+  display: flex; align-items: flex-start; gap: 1rem;
+  padding: 1.25rem 1.5rem; border-bottom: 1px dashed var(--clr-border);
+  border-left: 3px solid transparent; background: var(--bg-panel);
   transition: all 0.2s;
 }
+.brutal-issue-row:hover { background: var(--bg-card); transform: translateX(4px); }
+.brutal-issue-row:last-child { border-bottom: none; }
 
-.issue-row:hover { transform: translateX(2px); }
-.issue-row.error { border-left-color: #ef4444; background: #fef9f9; }
-.issue-row.warning { border-left-color: #f59e0b; background: #fffdf5; }
-.issue-row.info { border-left-color: #06b6d4; background: #f9fdfe; }
+.brutal-issue-row.error { border-left-color: var(--clr-danger); }
+.brutal-issue-row.warning { border-left-color: var(--clr-warning); }
+.brutal-issue-row.info { border-left-color: var(--clr-success); }
 
-.issue-severity { flex-shrink: 0; padding-top: 2px; }
-
-.severity-icon {
-  width: 28px; height: 28px; border-radius: 8px;
+.issue-severity { flex-shrink: 0; }
+.severity-square {
   display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; font-weight: 800; font-size: 0.8rem;
+  border: 1px solid currentColor; background: rgba(0,0,0,0.2);
 }
+.severity-square.error { color: var(--clr-danger); }
+.severity-square.warning { color: var(--clr-warning); }
+.severity-square.info { color: var(--clr-success); }
 
-.severity-icon.error { background: #fef2f2; color: #ef4444; }
-.severity-icon.warning { background: #fffbeb; color: #f59e0b; }
-.severity-icon.info { background: #ecfeff; color: #06b6d4; }
+.issue-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 
-.issue-main { flex: 1; min-width: 0; }
+.issue-top { display: flex; align-items: center; gap: 12px; }
+.issue-file { font-size: 0.85rem; font-weight: 700; color: var(--clr-text-main); word-break: break-all; }
+.issue-line { font-size: 0.7rem; color: #000; background: var(--clr-text-muted); padding: 1px 6px; font-weight: 700; }
 
-.issue-top {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 5px;
+.issue-message { font-family: 'Noto Sans SC', sans-serif; font-size: 0.85rem; color: var(--clr-text-muted); }
+
+.issue-rule { font-size: 0.7rem; color: var(--clr-text-muted); }
+.rule-prefix { color: var(--clr-accent); }
+
+.issue-badge { flex-shrink: 0; }
+.brutal-severity-badge {
+  padding: 4px 8px; font-size: 0.7rem; font-weight: 700; border: 1px solid currentColor;
 }
-
-.issue-file {
-  font-size: 12px; font-weight: 600; color: #475569;
-  font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-
-.issue-line {
-  font-size: 11px; color: #94a3b8;
-  background: #f1f5f9; padding: 2px 6px; border-radius: 4px; flex-shrink: 0;
-}
-
-.issue-message {
-  font-size: 13px; color: #334155; line-height: 1.5; margin-bottom: 6px;
-}
-
-.issue-rule {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 11px; color: #94a3b8; font-family: monospace;
-}
-
-.issue-badge { flex-shrink: 0; padding-top: 2px; }
-
-.severity-badge {
-  padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
-}
-
-.severity-badge.error { background: #fef2f2; color: #ef4444; }
-.severity-badge.warning { background: #fffbeb; color: #d97706; }
-.severity-badge.info { background: #ecfeff; color: #0891b2; }
+.brutal-severity-badge.error { color: var(--clr-danger); }
+.brutal-severity-badge.warning { color: var(--clr-warning); }
+.brutal-severity-badge.info { color: var(--clr-success); }
 </style>

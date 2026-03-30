@@ -1,51 +1,83 @@
 <template>
-  <div class="dashboard">
-    <!-- Stats Cards -->
-    <div class="stats-grid">
-      <div v-for="stat in stats" :key="stat.key" class="stat-card" :class="stat.colorClass">
-        <div class="stat-icon" v-html="stat.icon"></div>
-        <div class="stat-content">
-          <div class="stat-value">
-            <CountUp :end="overview[stat.key]" :duration="1.5" />
+  <div class="terminal-dashboard">
+    <div class="grid-overlay"></div>
+
+    <div class="dashboard-content">
+      
+      <header class="sys-header">
+        <div class="sys-title">
+          <span class="dot blink pulse-lime"></span>
+          <span class="mono-text">SYS.DASHBOARD // OVERVIEW_METRICS</span>
+        </div>
+        <div class="sys-time">UPTIME: <span class="accent-text">ACTIVE</span></div>
+      </header>
+
+      <div class="stats-grid">
+        <div v-for="stat in stats" :key="stat.key" class="brutal-stat-card" :class="stat.colorClass">
+          <div class="stat-top">
+            <span class="stat-icon-wrapper" v-html="stat.icon"></span>
+            <span class="stat-label">[ {{ stat.label }} ]</span>
           </div>
-          <div class="stat-label">{{ stat.label }}</div>
+          <div class="stat-bottom">
+            <span class="prefix-arrow">></span>
+            <div class="stat-value">
+              <CountUp :end="overview[stat.key]" :duration="1.5" />
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Project Selector -->
-    <div class="section-card">
-      <div class="section-header">
-        <h3 class="section-title">项目分析</h3>
-        <el-select
-          v-model="selectedProjectId"
-          placeholder="选择项目查看详情"
-          style="width: 240px"
-          @change="loadCharts"
-          size="large"
-        >
-          <el-option v-for="p in projects" :key="p.id" :label="p.name" :value="p.id" />
-        </el-select>
-      </div>
-
-      <div v-if="!selectedProjectId" class="empty-tip">
-        <svg viewBox="0 0 64 64" width="64" height="64" fill="none">
-          <circle cx="32" cy="32" r="28" fill="#f1f5f9"/>
-          <path d="M20 44L28 28L36 38L42 32" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <p>请从上方选择一个项目以加载图表数据</p>
-      </div>
-
-      <div v-else class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-title">项目健康度雷达图</div>
-          <HealthRadar :data="radarData" />
+      <div class="brutal-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">TELEMETRY_ANALYSIS</h3>
+          
+          <div class="brutal-select-wrapper">
+            <span class="select-prefix">TARGET:</span>
+            <el-select
+              v-model="selectedProjectId"
+              placeholder="AWAITING_INPUT..."
+              style="width: 260px"
+              @change="loadCharts"
+              size="large"
+              class="brutal-select"
+              popper-class="brutal-popper"
+            >
+              <el-option v-for="p in projects" :key="p.id" :label="p.name" :value="p.id" />
+            </el-select>
+          </div>
         </div>
-        <div class="chart-card">
-          <div class="chart-title">问题趋势图</div>
-          <TechDebtTrend :data="trendData" />
+
+        <div v-if="!selectedProjectId" class="terminal-empty">
+          <div class="empty-content">
+            <span class="terminal-cursor blink">_</span>
+            <p class="empty-text">SYSTEM STANDBY.</p>
+            <p class="empty-subtext">REQUIRED: SELECT A PROJECT TO INITIALIZE DATA STREAM...</p>
+          </div>
+        </div>
+
+        <div v-else class="charts-grid">
+          <div class="brutal-chart-card">
+            <div class="chart-top-bar">
+              <span class="bar-title">MODULE: HEALTH_RADAR</span>
+              <span class="bar-status">ON_LINE</span>
+            </div>
+            <div class="chart-container">
+              <HealthRadar :data="radarData" />
+            </div>
+          </div>
+          
+          <div class="brutal-chart-card">
+            <div class="chart-top-bar">
+              <span class="bar-title">MODULE: DEBT_TREND</span>
+              <span class="bar-status">ON_LINE</span>
+            </div>
+            <div class="chart-container">
+              <TechDebtTrend :data="trendData" />
+            </div>
+          </div>
         </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -56,6 +88,7 @@ import { getOverview, getHealthRadar, getTrend } from '../../api/dashboard'
 import { getProjectList } from '../../api/project'
 import HealthRadar from '../../components/HealthRadar.vue'
 import TechDebtTrend from '../../components/TechDebtTrend.vue'
+import { useUserStore } from '../../store/user'
 
 // Simple CountUp component inline
 import { defineComponent, h, watch } from 'vue'
@@ -82,17 +115,69 @@ const CountUp = defineComponent({
   }
 })
 
-const overview = ref({
-  totalProjects: 0, totalScans: 0, totalIssues: 0,
-  errorCount: 0, warningCount: 0, infoCount: 0
-})
+// const overview = ref({
+//   totalProjects: 0, totalScans: 0, totalIssues: 0,
+//   errorCount: 0, warningCount: 0, infoCount: 0
+// })
 
 const projects = ref<any[]>([])
 const selectedProjectId = ref<number | null>(null)
 const radarData = ref<any>(null)
 const trendData = ref<any>(null)
 
-const stats = [
+// const stats = [
+//   {
+//     key: 'totalProjects', label: '项目总数', colorClass: 'blue',
+//     icon: `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>`
+//   },
+//   {
+//     key: 'totalScans', label: '扫描次数', colorClass: 'purple',
+//     icon: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clip-rule="evenodd"/></svg>`
+//   },
+//   {
+//     key: 'totalIssues', label: '问题总数', colorClass: 'gray',
+//     icon: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>`
+//   },
+//   {
+//     key: 'errorCount', label: '错误', colorClass: 'red',
+//     icon: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>`
+//   },
+//   {
+//     key: 'warningCount', label: '警告', colorClass: 'yellow',
+//     icon: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>`
+//   },
+//   {
+//     key: 'infoCount', label: '提示', colorClass: 'cyan',
+//     icon: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>`
+//   }
+// ]
+
+// 1. 定义严谨的数据大屏接口约束
+interface OverviewData {
+  totalProjects: number;
+  totalScans: number;
+  totalIssues: number;
+  errorCount: number;
+  warningCount: number;
+  infoCount: number;
+}
+
+// 2. 为 overview 数据源注入类型
+const overview = ref<OverviewData>({
+  totalProjects: 0, totalScans: 0, totalIssues: 0,
+  errorCount: 0, warningCount: 0, infoCount: 0
+})
+
+// 3. 约束卡片配置项，声明 key 必须严格隶属于 OverviewData 的键
+interface StatConfig {
+  key: keyof OverviewData;
+  label: string;
+  colorClass: string;
+  icon: string;
+}
+
+// 4. 应用约束到数组
+const stats: StatConfig[] = [
   {
     key: 'totalProjects', label: '项目总数', colorClass: 'blue',
     icon: `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>`
@@ -119,7 +204,10 @@ const stats = [
   }
 ]
 
+const userStore = useUserStore()  // 测试用户信息
+
 onMounted(async () => {
+  console.log(userStore.role)
   const [overviewRes, projectRes] = await Promise.all([
     getOverview(), getProjectList()
   ]) as any[]
@@ -136,119 +224,335 @@ async function loadCharts() {
   radarData.value = radarRes.data
   trendData.value = trendRes.data
 }
+
 </script>
 
 <style scoped>
-.dashboard { display: flex; flex-direction: column; gap: 24px; }
+/* 引入顶级设计字体 */
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@400;500;700&display=swap');
 
+.terminal-dashboard {
+  --bg-dark: #090a0f;
+  --bg-panel: #11131a;
+  --bg-card: #161922;
+  --clr-accent: #ccff00; /* Electric Lime */
+  --clr-accent-dim: rgba(204, 255, 0, 0.15);
+  --clr-text-main: #ffffff;
+  --clr-text-muted: #6b7280;
+  --clr-border: #272a35;
+  
+  /* 终端状态色映射 */
+  --clr-blue: #00e5ff;
+  --clr-purple: #b026ff;
+  --clr-gray: #ffffff;
+  --clr-red: #ff3366;
+  --clr-yellow: #ffaa00;
+  --clr-cyan: #ccff00;
+
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+  font-family: 'Space Mono', monospace;
+  position: relative;
+  padding: 2rem;
+  color: var(--clr-text-main);
+}
+
+/* 工业风量化网格背景 */
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(var(--clr-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--clr-border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dashboard-content {
+  position: relative;
+  z-index: 10;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* 顶部状态栏 */
+.sys-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--clr-border);
+  padding-bottom: 1rem;
+}
+
+.sys-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: var(--clr-text-muted);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.pulse-lime {
+  background-color: var(--clr-accent);
+  box-shadow: 0 0 10px var(--clr-accent);
+}
+
+.blink { animation: pulse 2s infinite; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.sys-time {
+  font-size: 0.8rem;
+  color: var(--clr-text-muted);
+}
+
+.accent-text { color: var(--clr-accent); font-weight: 700; }
+
+/* 统计卡片网格 */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 16px;
+  gap: 1.5rem;
 }
 
 @media (max-width: 1400px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
 
-.stat-card {
-  background: #fff;
-  border-radius: 14px;
-  padding: 20px;
+/* 粗犷风数据卡片 */
+.brutal-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--clr-border);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.brutal-stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 4px; height: 100%;
+  background-color: var(--theme-color);
+}
+
+.brutal-stat-card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 6px 6px 0px var(--theme-color);
+  border-color: var(--theme-color);
+}
+
+.stat-top {
   display: flex;
   align-items: center;
-  gap: 14px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  border: 1px solid #f0f4f8;
-  transition: transform 0.2s, box-shadow 0.2s;
+  gap: 0.75rem;
 }
 
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+.stat-icon-wrapper {
+  color: var(--theme-color);
+  display: flex;
+  align-items: center;
 }
 
-.stat-icon {
-  width: 44px; height: 44px;
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+.stat-icon-wrapper :deep(svg) { width: 18px; height: 18px; }
+
+.stat-label {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--clr-text-muted);
+  text-transform: uppercase;
 }
 
-.stat-icon :deep(svg) { width: 22px; height: 22px; }
+.stat-bottom {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
 
-.blue .stat-icon { background: #eff6ff; color: #3b82f6; }
-.purple .stat-icon { background: #f5f3ff; color: #8b5cf6; }
-.gray .stat-icon { background: #f8fafc; color: #64748b; }
-.red .stat-icon { background: #fef2f2; color: #ef4444; }
-.yellow .stat-icon { background: #fffbeb; color: #f59e0b; }
-.cyan .stat-icon { background: #ecfeff; color: #06b6d4; }
+.prefix-arrow {
+  color: var(--theme-color);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 2px;
+}
 
 .stat-value {
-  font-size: 26px;
-  font-weight: 800;
-  color: #1e293b;
+  font-family: 'Clash Display', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
   line-height: 1;
-  margin-bottom: 4px;
+  color: var(--theme-color);
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
-.red .stat-value { color: #ef4444; }
-.yellow .stat-value { color: #f59e0b; }
-.cyan .stat-value { color: #06b6d4; }
+/* 卡片颜色映射 (覆写原有逻辑产生的 class) */
+.brutal-stat-card.blue { --theme-color: var(--clr-blue); }
+.brutal-stat-card.purple { --theme-color: var(--clr-purple); }
+.brutal-stat-card.gray { --theme-color: var(--clr-gray); }
+.brutal-stat-card.red { --theme-color: var(--clr-red); }
+.brutal-stat-card.yellow { --theme-color: var(--clr-yellow); }
+.brutal-stat-card.cyan { --theme-color: var(--clr-cyan); }
 
-.stat-label { font-size: 12px; color: #94a3b8; font-weight: 500; }
-
-.section-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  border: 1px solid #f0f4f8;
+/* 下方主体大面板 */
+.brutal-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--clr-border);
+  box-shadow: 12px 12px 0px rgba(0,0,0,0.5);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-.section-header {
+.panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  border-bottom: 1px dashed var(--clr-border);
+  padding-bottom: 1.5rem;
 }
 
-.section-title {
-  font-size: 16px;
+.panel-title {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--clr-accent);
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+/* 定制化 el-select (Brutalist) */
+.brutal-select-wrapper {
+  display: flex;
+  align-items: center;
+  background: var(--bg-dark);
+  border: 1px solid var(--clr-border);
+}
+
+.select-prefix {
+  padding: 0 1rem;
+  color: var(--clr-text-muted);
+  font-size: 0.8rem;
   font-weight: 700;
-  color: #1e293b;
+  border-right: 1px solid var(--clr-border);
+}
+
+.brutal-select :deep(.el-input__wrapper) {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.brutal-select :deep(.el-input__inner) {
+  color: var(--clr-text-main) !important;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+}
+
+.brutal-select :deep(.el-input__wrapper.is-focus) {
+  background: rgba(204, 255, 0, 0.05) !important;
+}
+
+/* 空状态终端提示 */
+.terminal-empty {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  border: 1px solid var(--clr-border);
+}
+
+.empty-content {
+  text-align: center;
+}
+
+.terminal-cursor {
+  display: block;
+  font-size: 3rem;
+  color: var(--clr-accent);
+  margin-bottom: 1rem;
+}
+
+.empty-text {
+  font-size: 1.25rem;
+  color: var(--clr-text-main);
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.empty-subtext {
+  font-size: 0.85rem;
+  color: var(--clr-text-muted);
   margin: 0;
 }
 
-.empty-tip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px;
-  color: #94a3b8;
-  font-size: 14px;
-  gap: 12px;
-}
-
+/* 图表区域 */
 .charts-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: 2rem;
 }
 
 @media (max-width: 1100px) { .charts-grid { grid-template-columns: 1fr; } }
 
-.chart-card {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid #e2e8f0;
+.brutal-chart-card {
+  background: var(--bg-card);
+  border: 1px solid var(--clr-border);
+  display: flex;
+  flex-direction: column;
 }
 
-.chart-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #475569;
-  margin-bottom: 16px;
+.chart-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--bg-dark);
+  border-bottom: 1px solid var(--clr-border);
+  font-size: 0.75rem;
+}
+
+.bar-title {
+  color: var(--clr-text-main);
+  font-weight: 700;
+}
+
+.bar-status {
+  color: var(--clr-accent);
+  background: rgba(204, 255, 0, 0.1);
+  padding: 2px 6px;
+  border: 1px solid var(--clr-accent);
+}
+
+.chart-container {
+  padding: 1.5rem;
+  min-height: 350px;
+  /* 图表内部颜色如需适配，建议在 Echarts 配置项中设为暗色模式 */
 }
 </style>
