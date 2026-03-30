@@ -157,15 +157,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getUserList, register } from '../../api/user'
-
-// ==== 模拟数据与接口 (请在对接真实后端时替换) ====
-const mockUsers = [
-  { id: 1, username: 'admin_root', role: 'ADMIN', isActive: true, lastLogin: '2026-03-30 08:12:00' },
-  { id: 2, username: 'dev_ops_01', role: 'USER', isActive: true, lastLogin: '2026-03-29 14:30:22' },
-  { id: 3, username: 'qa_tester_99', role: 'USER', isActive: false, lastLogin: '2026-02-15 09:00:11' },
-  { id: 4, username: 'system_bot', role: 'USER', isActive: true, lastLogin: '2026-03-30 12:01:05' }
-]
-// =================================================
+import {updateUser} from "../../api/user";
 
 const users = ref<any[]>([])
 const loading = ref(false)
@@ -238,7 +230,11 @@ async function handleSubmit() {
   submitting.value = true
   try {
     if (dialogMode.value === 'CREATE') await register(form)
-    else await register(form)
+    else {
+        if (form.id !== null) {
+            await updateUser(form.id, form.role)
+        }
+    }
     
     setTimeout(() => {
       ElMessage.success('DIRECTIVE_EXECUTED_SUCCESSFULLY (操作成功)')

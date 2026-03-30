@@ -15,3 +15,7 @@ export function getUserInfo() {
 export function getUserList() {
   return request.get('/user/list')
 }
+
+export function updateUser(id: number, role: string) {
+  return request.put(`/user/${id}`, { role })
+}

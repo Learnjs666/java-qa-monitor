@@ -4,6 +4,7 @@ import cn.edu.swpu.java_qa_monitor.common.context.UserContext;
 import cn.edu.swpu.java_qa_monitor.common.dto.LoginRequest;
 import cn.edu.swpu.java_qa_monitor.common.dto.LoginResponse;
 import cn.edu.swpu.java_qa_monitor.common.dto.RegisterRequest;
+import cn.edu.swpu.java_qa_monitor.common.dto.UserRoleUpdateDTO;
 import cn.edu.swpu.java_qa_monitor.common.result.Result;
 import cn.edu.swpu.java_qa_monitor.domain.SysUser;
 import cn.edu.swpu.java_qa_monitor.service.SysUserService;
@@ -51,4 +52,11 @@ public class
         return Result.success(list);
     }
 
+    @PutMapping("/{id}")
+    public Result<?> updateUserRole(@PathVariable Integer id, @Valid @RequestBody UserRoleUpdateDTO dto) {
+        // TODO: 这里可以加一层鉴权逻辑（例如只有当前登录者是 ADMIN 才能执行此操作）
+
+        sysUserService.updateUserRole(id, dto.getRole());
+        return Result.success("实体权限已重新配置");
+    }
 }

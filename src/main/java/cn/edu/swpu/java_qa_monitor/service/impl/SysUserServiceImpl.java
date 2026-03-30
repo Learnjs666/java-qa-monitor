@@ -48,4 +48,20 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
         user.setRole(request.getRole() != null ? request.getRole() : "USER");
         save(user);
     }
+
+    @Override
+    public void updateUserRole(Integer id, String role) {
+        // 1. 查询用户是否存在
+        SysUser user = getById(id);
+        if (user == null) {
+            throw new RuntimeException("该实体节点不存在或已被销毁");
+        }
+
+        // 2. 更新角色字段
+        user.setRole(role);
+
+        // 3. 执行数据库更新
+        // MyBatis-Plus 的 updateById 会自动根据传入对象的非空字段进行更新
+        updateById(user);
+    }
 }
