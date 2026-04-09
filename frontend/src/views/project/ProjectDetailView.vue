@@ -3,17 +3,17 @@
     <div class="brutal-header">
       <div class="header-left">
         <button class="brutal-back-btn" @click="router.back()">
-          <span class="arrow"><</span> BACK
+          <span class="arrow"><</span> 返回
         </button>
         <div class="target-info">
-          <span class="target-label">TARGET_NODE //</span>
+          <span class="target-label">项目名称 //</span>
           <h2 class="display-title">{{ project?.name || 'AWAITING_DATA' }}</h2>
         </div>
       </div>
       
       <button class="brutal-btn primary" @click="handleScan" :disabled="scanning">
         <span class="btn-spinner" v-if="scanning"></span>
-        <span class="btn-text">{{ scanning ? 'EXECUTING_SCAN...' : 'INITIATE_SCAN' }}</span>
+        <span class="btn-text">{{ scanning ? '扫描中...' : '开始扫描' }}</span>
         <span class="btn-icon" v-if="!scanning">></span>
       </button>
     </div>
@@ -30,20 +30,20 @@
 
     <div class="brutal-section">
       <div class="section-top-bar">
-        <span class="bar-title">MODULE: FILE_UPLOAD</span>
-        <span class="bar-status">AWAITING_INPUT</span>
+        <span class="bar-title">模块：文件上传</span>
+        <span class="bar-status">等待输入</span>
       </div>
       <div class="section-content">
-        <p class="hint-text">SUPPORTED_FORMATS: .JAVA | .ZIP</p>
+        <p class="hint-text">支持的文件类型: .JAVA | .ZIP</p>
         <FileUpload :project-id="projectId" @uploaded="loadProject" />
       </div>
     </div>
 
     <div class="brutal-section">
       <div class="section-top-bar">
-        <span class="bar-title">MODULE: SCAN_TELEMETRY</span>
+        <span class="bar-title">模块：扫描遥测</span>
         <button class="brutal-text-btn" @click="loadTasks" title="REFRESH">
-          [ REFRESH_LOGS ]
+          [ 刷新日志列表 ]
         </button>
       </div>
 
@@ -53,7 +53,7 @@
         </div>
 
         <div v-else-if="tasks.length === 0" class="log-empty">
-          <span class="blink">_</span> NO_TELEMETRY_DATA_FOUND. INITIATE SCAN TO BEGIN.
+          <span class="blink">_</span> 暂无扫描任务记录，点击上方按钮开始第一次扫描
         </div>
 
         <div v-else class="log-list">
@@ -74,8 +74,8 @@
             </div>
 
             <div class="log-col action-col">
-              <button class="brutal-action-link" @click="router.push(`/scan/${task.id}`)">VIEW_METRICS</button>
-              <button class="brutal-action-link text-warning" @click="router.push(`/issues/${task.id}`)">DEBUG_ISSUES</button>
+              <button class="brutal-action-link" @click="router.push(`/scan/${task.id}`)">查看详情</button>
+              <button class="brutal-action-link text-warning" @click="router.push(`/issues/${task.id}`)">调试问题</button>
             </div>
           </div>
         </div>

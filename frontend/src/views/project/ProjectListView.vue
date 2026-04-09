@@ -3,11 +3,11 @@
     <div class="page-header">
       <div class="header-title-group">
         <span class="blinking-cursor">_</span>
-        <h2 class="display-title">PROJECT_MATRIX // DIRECTORY</h2>
+        <h2 class="display-title">项目列表</h2>
       </div>
       <button class="brutal-btn primary" @click="showCreateDialog = true">
         <span class="btn-icon">+</span>
-        <span class="btn-text">INITIALIZE_PROJECT</span>
+        <span class="btn-text">新增项目</span>
       </button>
     </div>
 
@@ -16,10 +16,10 @@
     </div>
 
     <div v-else-if="projects.length === 0" class="terminal-empty-state">
-      <div class="empty-glitch">[ DIRECTORY_EMPTY ]</div>
-      <p class="empty-subtext">SYSTEM REQUIRES A NEW PROJECT ENTITY TO COMMENCE TELEMETRY.</p>
+      <div class="empty-glitch">[ 还没有创建项目 ]</div>
+      <p class="empty-subtext">系统需要一个新的项目实体来启动检测。</p>
       <button class="brutal-btn outline" @click="showCreateDialog = true">
-        ALLOCATE_NEW_WORKSPACE
+        创建第一个项目
       </button>
     </div>
 
@@ -49,8 +49,8 @@
             <span class="stat-value">{{ project.fileCount || 0 }}</span>
           </div>
           <div class="actions" @click.stop>
-            <button class="brutal-icon-btn text-accent" @click="router.push(`/project/${project.id}`)">ENTER</button>
-            <button class="brutal-icon-btn text-danger" @click="handleDelete(project.id)">PURGE</button>
+            <button class="brutal-icon-btn text-accent" @click="router.push(`/project/${project.id}`)">进入</button>
+            <button class="brutal-icon-btn text-danger" @click="handleDelete(project.id)">删除</button>
           </div>
         </div>
       </div>
@@ -58,30 +58,30 @@
 
     <el-dialog 
       v-model="showCreateDialog" 
-      title="ALLOCATE_NEW_ENTITY" 
+      title="创建新项目" 
       width="500px" 
       :close-on-click-modal="false" 
       class="brutal-dialog"
     >
       <el-form :model="createForm" label-position="top" class="brutal-form">
-        <el-form-item label="ENTITY_NAME (项目名称)">
+        <el-form-item label="项目名称">
           <div class="input-wrapper">
-            <span class="input-prefix">NAME></span>
-            <el-input v-model="createForm.name" placeholder="AWAITING_INPUT..." size="large" class="brutal-input" />
+            <span class="input-prefix">名字</span>
+            <el-input v-model="createForm.name" placeholder="请输入项目名称" size="large" class="brutal-input" />
           </div>
         </el-form-item>
-        <el-form-item label="PARAMETERS (项目描述)">
+        <el-form-item label="项目描述">
           <div class="input-wrapper textarea-wrapper">
-            <el-input v-model="createForm.description" type="textarea" :rows="3" placeholder="OPTIONAL_PARAMETERS..." class="brutal-input" />
+            <el-input v-model="createForm.description" type="textarea" :rows="3" placeholder="请输入项目描述" class="brutal-input" />
           </div>
         </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <button class="brutal-btn outline-muted" @click="showCreateDialog = false">ABORT</button>
+          <button class="brutal-btn outline-muted" @click="showCreateDialog = false">取消</button>
           <button class="brutal-btn primary" :disabled="creating" @click="handleCreate">
             <span class="btn-spinner" v-if="creating"></span>
-            {{ creating ? 'ALLOCATING...' : 'CONFIRM_EXECUTION' }}
+            {{ creating ? '创建中...' : '创建项目' }}
           </button>
         </div>
       </template>

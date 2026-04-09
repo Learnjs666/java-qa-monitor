@@ -7,9 +7,9 @@
       <header class="sys-header">
         <div class="sys-title">
           <span class="dot blink pulse-lime"></span>
-          <span class="mono-text">SYS.DASHBOARD // OVERVIEW_METRICS</span>
+          <span class="mono-text">系统仪表盘 // 检测概览</span>
         </div>
-        <div class="sys-time">UPTIME: <span class="accent-text">ACTIVE</span></div>
+        <div class="sys-time">运行状态：<span class="accent-text">ACTIVE</span></div>
       </header>
 
       <div class="stats-grid">
@@ -29,10 +29,10 @@
 
       <div class="brutal-panel">
         <div class="panel-header">
-          <h3 class="panel-title">TELEMETRY_ANALYSIS</h3>
+          <h3 class="panel-title">可视化分析</h3>
           
           <div class="brutal-select-wrapper">
-            <span class="select-prefix">TARGET:</span>
+            <span class="select-prefix">目标：</span>
             <el-select
               v-model="selectedProjectId"
               placeholder="AWAITING_INPUT..."
@@ -50,16 +50,16 @@
         <div v-if="!selectedProjectId" class="terminal-empty">
           <div class="empty-content">
             <span class="terminal-cursor blink">_</span>
-            <p class="empty-text">SYSTEM STANDBY.</p>
-            <p class="empty-subtext">REQUIRED: SELECT A PROJECT TO INITIALIZE DATA STREAM...</p>
+            <p class="empty-text">系统待命。</p>
+            <p class="empty-subtext">要求：选择一个项目初始化数据流</p>
           </div>
         </div>
 
         <div v-else class="charts-grid">
           <div class="brutal-chart-card">
             <div class="chart-top-bar">
-              <span class="bar-title">MODULE: HEALTH_RADAR</span>
-              <span class="bar-status">ON_LINE</span>
+              <span class="bar-title">模块: 检测结果雷达</span>
+              <span class="bar-status">在线</span>
             </div>
             <div class="chart-container">
               <HealthRadar :data="radarData" />
@@ -68,8 +68,8 @@
           
           <div class="brutal-chart-card">
             <div class="chart-top-bar">
-              <span class="bar-title">MODULE: DEBT_TREND</span>
-              <span class="bar-status">ON_LINE</span>
+              <span class="bar-title">模块：技术问题趋势</span>
+              <span class="bar-status">在线</span>
             </div>
             <div class="chart-container">
               <TechDebtTrend :data="trendData" />

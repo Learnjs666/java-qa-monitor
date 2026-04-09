@@ -3,11 +3,11 @@
     <div class="page-header">
       <div class="header-left">
         <button class="brutal-back-btn" @click="router.back()">
-          <span class="arrow"><</span> BACK
+          <span class="arrow"><</span> 返回
         </button>
         <div class="header-title-group">
-          <h2 class="display-title">ISSUE_TRACKER</h2>
-          <span class="task-id-badge">TASK_#{{ taskId }}</span>
+          <h2 class="display-title">问题追踪</h2>
+          <span class="task-id-badge">任务_#{{ taskId }}</span>
           <span class="blinking-cursor">_</span>
         </div>
       </div>

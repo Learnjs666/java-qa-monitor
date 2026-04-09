@@ -7,31 +7,31 @@
       </div>
       <div class="header-right">
         <div class="brutal-search-wrap">
-          <span class="search-prefix">QUERY></span>
+          <span class="search-prefix">查找></span>
           <input v-model="searchQuery" class="brutal-search-input" placeholder="USERNAME..." />
         </div>
         <button class="brutal-btn primary" @click="openDialog('CREATE')">
           <span class="btn-icon">+</span>
-          <span class="btn-text">ALLOCATE_ENTITY</span>
+          <span class="btn-text">创建用户</span>
         </button>
       </div>
     </div>
 
     <div class="stats-grid">
       <div class="brutal-stat-block default">
-        <span class="stat-label">TOTAL_ENTITIES</span>
+        <span class="stat-label">用户数量</span>
         <span class="stat-val">{{ users.length }}</span>
       </div>
       <div class="brutal-stat-block admin">
-        <span class="stat-label">SYS_ADMINS</span>
+        <span class="stat-label">管理账户</span>
         <span class="stat-val">{{ adminCount }}</span>
       </div>
       <div class="brutal-stat-block active">
-        <span class="stat-label">ACTIVE_USERS</span>
+        <span class="stat-label">活跃用户</span>
         <span class="stat-val">{{ activeCount }}</span>
       </div>
       <div class="brutal-stat-block banned">
-        <span class="stat-label">RESTRICTED</span>
+        <span class="stat-label">受限用户</span>
         <span class="stat-val">{{ users.length - activeCount }}</span>
       </div>
     </div>
@@ -47,12 +47,12 @@
 
       <div v-else class="brutal-data-table">
         <div class="table-header">
-          <div class="col-id">UID</div>
-          <div class="col-user">IDENTITY_NAME</div>
-          <div class="col-role">CLEARANCE_LEVEL</div>
-          <div class="col-status">NODE_STATUS</div>
-          <div class="col-time">LAST_TELEMETRY</div>
-          <div class="col-actions">DIRECTIVES</div>
+          <div class="col-id">ID</div>
+          <div class="col-user">用户名</div>
+          <div class="col-role">权限级别</div>
+          <div class="col-status">状态</div>
+          <div class="col-time">最后活动</div>
+          <div class="col-actions">操作</div>
         </div>
 
         <div
@@ -86,13 +86,13 @@
           <div class="col-time">{{ user.updateTime || 'NEVER' }}</div>
 
           <div class="col-actions">
-            <button class="brutal-action-link text-warning" @click="openDialog('EDIT', user)">[ CONFIGURE ]</button>
+            <button class="brutal-action-link text-warning" @click="openDialog('EDIT', user)">[ 编辑 ]</button>
             <button 
               class="brutal-action-link" 
               :class="user.status ? 'text-danger' : 'text-success'"
               @click="toggleStatus(user)"
             >
-              {{ user.status ? '[ BAN_ENTITY ]' : '[ RESTORE ]' }}
+              {{ user.status ? '[ 禁用 ]' : '[ 恢复 ]' }}
             </button>
           </div>
         </div>
@@ -142,10 +142,10 @@
 
       <template #footer>
         <div class="dialog-footer">
-          <button class="brutal-btn outline-muted" @click="showDialog = false">ABORT</button>
+          <button class="brutal-btn outline-muted" @click="showDialog = false">取消</button>
           <button class="brutal-btn primary" :disabled="submitting" @click="handleSubmit">
             <span class="btn-spinner" v-if="submitting"></span>
-            {{ submitting ? 'PROCESSING...' : 'EXECUTE_OVERRIDE' }}
+            {{ submitting ? '处理中...' : '确定' }}
           </button>
         </div>
       </template>

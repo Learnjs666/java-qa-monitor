@@ -1,7 +1,7 @@
 <template>
   <div class="terminal-topbar">
     <div class="process-indicator">
-      <span class="process-label">CURRENT_PROCESS</span>
+      <span class="process-label">当前进程</span>
       <span class="separator">//</span>
       <h1 class="page-title">{{ pageTitle.toUpperCase() }}</h1>
     </div>
@@ -10,13 +10,13 @@
       <div class="user-block">
         <div class="avatar-square">[{{ avatarChar }}]</div>
         <div class="user-details">
-          <span class="role-label">AUTH_USER</span>
+          <span class="role-label">用户</span>
           <span class="username">{{ userStore.username || 'UNKNOWN_ENTITY' }}</span>
         </div>
       </div>
       
       <button class="brutal-logout-btn" @click="handleLogout">
-        <span class="btn-text">TERMINATE</span>
+        <span class="btn-text">退出</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
           <path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10" stroke-linecap="square" stroke-linejoin="miter"/>
         </svg>
