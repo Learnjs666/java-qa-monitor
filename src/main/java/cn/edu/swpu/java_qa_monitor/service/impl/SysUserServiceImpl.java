@@ -64,4 +64,19 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
         // MyBatis-Plus 的 updateById 会自动根据传入对象的非空字段进行更新
         updateById(user);
     }
+
+    @Override
+    public void updateUserStatus(Integer id, Boolean status) {
+        // 1. 查询用户是否存在
+        SysUser user = getById(id);
+        if (user == null) {
+            throw new RuntimeException("该用户不存在");
+        }
+
+        // 2. 更新状态字段 (根据你的实体类属性名调整，如 setStatus 或 setIsActive)
+        user.setStatus(status);
+
+        // 3. 执行数据库更新
+        updateById(user);
+    }
 }

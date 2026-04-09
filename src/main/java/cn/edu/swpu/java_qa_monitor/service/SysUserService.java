@@ -16,4 +16,6 @@ public interface SysUserService extends IService<SysUser> {
     void register(RegisterRequest request);
 
     void updateUserRole(Integer id, @NotBlank(message = "角色级别不能为空") @Pattern(regexp = "^(ADMIN|USER)$", message = "非法的权限级别") String role);
+
+    void updateUserStatus(Integer id, Boolean status);
 }

@@ -19,3 +19,7 @@ export function getUserList() {
 export function updateUser(id: number, role: string) {
   return request.put(`/user/${id}`, { role })
 }
+
+export function updateUserStatus(id: number, status: boolean) {
+  return request.put(`/user/${id}/status`, { status: !status })
+}

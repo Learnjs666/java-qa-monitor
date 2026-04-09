@@ -1,10 +1,7 @@
 package cn.edu.swpu.java_qa_monitor.controller;
 
 import cn.edu.swpu.java_qa_monitor.common.context.UserContext;
-import cn.edu.swpu.java_qa_monitor.common.dto.LoginRequest;
-import cn.edu.swpu.java_qa_monitor.common.dto.LoginResponse;
-import cn.edu.swpu.java_qa_monitor.common.dto.RegisterRequest;
-import cn.edu.swpu.java_qa_monitor.common.dto.UserRoleUpdateDTO;
+import cn.edu.swpu.java_qa_monitor.common.dto.*;
 import cn.edu.swpu.java_qa_monitor.common.result.Result;
 import cn.edu.swpu.java_qa_monitor.domain.SysUser;
 import cn.edu.swpu.java_qa_monitor.service.SysUserService;
@@ -58,5 +55,12 @@ public class
 
         sysUserService.updateUserRole(id, dto.getRole());
         return Result.success("实体权限已重新配置");
+    }
+
+    @PutMapping("/{id}/status")
+    public Result<?> updateUserStatus(@PathVariable Integer id, @Valid @RequestBody UserStatusUpdateDTO dto) {
+        System.out.println("参数：" + dto);
+        sysUserService.updateUserStatus(id, dto.getStatus());
+        return Result.success("账号状态已成功更新");
     }
 }

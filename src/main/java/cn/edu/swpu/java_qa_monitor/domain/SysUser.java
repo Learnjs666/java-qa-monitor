@@ -53,7 +53,7 @@ public class SysUser {
     /*
     * 状态
     * */
-    private Integer status;
+    private Boolean status;
 
     @Override
     public boolean equals(Object that) {

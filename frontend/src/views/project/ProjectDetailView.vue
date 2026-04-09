@@ -1,82 +1,106 @@
 <template>
-  <div class="terminal-page">
-    <div class="brutal-header">
+  <div class="sq-page">
+    <!-- 面包屑与顶部头 -->
+    <div class="sq-page-header">
       <div class="header-left">
-        <button class="brutal-back-btn" @click="router.back()">
-          <span class="arrow"><</span> 返回
+        <button class="sq-back-btn" @click="router.back()">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+          返回项目列表
         </button>
-        <div class="target-info">
-          <span class="target-label">项目名称 //</span>
-          <h2 class="display-title">{{ project?.name || 'AWAITING_DATA' }}</h2>
-        </div>
+        <h2 class="sq-page-title">{{ project?.name || '项目详情加载中...' }}</h2>
       </div>
       
-      <button class="brutal-btn primary" @click="handleScan" :disabled="scanning">
+      <button class="sq-btn primary" @click="handleScan" :disabled="scanning">
         <span class="btn-spinner" v-if="scanning"></span>
-        <span class="btn-text">{{ scanning ? '扫描中...' : '开始扫描' }}</span>
-        <span class="btn-icon" v-if="!scanning">></span>
+        <svg v-else viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+          <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+        </svg>
+        执行代码扫描
       </button>
     </div>
 
-    <div class="info-bento">
-      <div class="brutal-info-card" v-for="item in projectInfoItems" :key="item.label">
-        <div class="card-top">
-          <span class="info-icon" v-html="item.icon"></span>
-          <span class="info-label">[ {{ item.label }} ]</span>
-        </div>
-        <div class="info-value">{{ item.value }}</div>
+    <!-- 项目基本信息（轻量化横幅） -->
+    <div class="sq-info-banner">
+      <div class="info-item">
+        <span class="info-label">项目描述</span>
+        <span class="info-value">{{ project?.description || '无' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">解析文件数</span>
+        <span class="info-value">{{ project?.fileCount || 0 }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">创建日期</span>
+        <span class="info-value">{{ formatDate(project?.createTime) }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">存储源路径</span>
+        <span class="info-value code-font">{{ project?.sourcePath || '暂未初始化' }}</span>
       </div>
     </div>
 
-    <div class="brutal-section">
-      <div class="section-top-bar">
-        <span class="bar-title">模块：文件上传</span>
-        <span class="bar-status">等待输入</span>
-      </div>
-      <div class="section-content">
-        <p class="hint-text">支持的文件类型: .JAVA | .ZIP</p>
-        <FileUpload :project-id="projectId" @uploaded="loadProject" />
-      </div>
-    </div>
+    <div class="sq-two-col-layout">
+      <!-- 左侧主栏：扫描记录 -->
+      <div class="sq-main-col">
+        <div class="sq-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">分析执行历史</h3>
+            <button class="sq-btn-text" @click="loadTasks" title="刷新记录">刷新数据</button>
+          </div>
 
-    <div class="brutal-section">
-      <div class="section-top-bar">
-        <span class="bar-title">模块：扫描遥测</span>
-        <button class="brutal-text-btn" @click="loadTasks" title="REFRESH">
-          [ 刷新日志列表 ]
-        </button>
-      </div>
+          <div class="panel-body no-padding">
+            <div v-if="tasksLoading" class="sq-loading-placeholder">
+              <div v-for="i in 3" :key="i" class="sq-skeleton-row"></div>
+            </div>
 
-      <div class="section-content no-padding">
-        <div v-if="tasksLoading" class="log-rows-container">
-          <div v-for="i in 4" :key="i" class="log-skeleton"></div>
+            <div v-else-if="tasks.length === 0" class="sq-empty-state">
+              <p>该项目目前没有任何活动。</p>
+              <p>请上传源码并点击上方「执行代码扫描」按钮。</p>
+            </div>
+
+            <div v-else class="sq-task-table">
+              <div class="table-header">
+                <div class="col-id">记录 ID</div>
+                <div class="col-status">执行状态</div>
+                <div class="col-metrics">概览指标</div>
+                <div class="col-time">触发时间</div>
+                <div class="col-actions"></div>
+              </div>
+              
+              <div v-for="task in tasks" :key="task.id" class="table-row">
+                <div class="col-id">#{{ task.id }}</div>
+                <div class="col-status">
+                  <span class="sq-status-badge" :class="task.status.toLowerCase()">
+                    {{ statusLabel(task.status) }}
+                  </span>
+                </div>
+                <div class="col-metrics">
+                  <span>{{ task.fileCount || 0 }} 文件</span>
+                  <span class="divider">/</span>
+                  <span :class="{'text-red': task.issueCount > 0}">{{ task.issueCount || 0 }} 问题</span>
+                </div>
+                <div class="col-time">{{ formatDate(task.createTime) }}</div>
+                <div class="col-actions">
+                  <a class="sq-link" @click="router.push(`/scan/${task.id}`)">详细指标</a>
+                  <span class="divider">|</span>
+                  <a class="sq-link text-orange" @click="router.push(`/issues/${task.id}`)">审查问题</a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div v-else-if="tasks.length === 0" class="log-empty">
-          <span class="blink">_</span> 暂无扫描任务记录，点击上方按钮开始第一次扫描
-        </div>
-
-        <div v-else class="log-list">
-          <div v-for="task in tasks" :key="task.id" class="log-row">
-            <div class="log-col id-col">#{{ String(task.id).padStart(4, '0') }}</div>
-            
-            <div class="log-col status-col">
-              <span class="brutal-badge" :class="task.status.toLowerCase()">
-                <span class="dot"></span>
-                {{ statusLabel(task.status) }}
-              </span>
-            </div>
-
-            <div class="log-col meta-col">
-              <div class="meta-item"><span>FILES:</span> {{ task.fileCount || 0 }}</div>
-              <div class="meta-item"><span>ISSUES:</span> <span :class="{'text-danger': task.issueCount > 0}">{{ task.issueCount || 0 }}</span></div>
-              <div class="meta-item"><span>TS:</span> {{ formatDate(task.createTime) }}</div>
-            </div>
-
-            <div class="log-col action-col">
-              <button class="brutal-action-link" @click="router.push(`/scan/${task.id}`)">查看详情</button>
-              <button class="brutal-action-link text-warning" @click="router.push(`/issues/${task.id}`)">调试问题</button>
-            </div>
+      <!-- 右侧侧边栏：上传组件 -->
+      <div class="sq-side-col">
+        <div class="sq-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">源码更新</h3>
+          </div>
+          <div class="panel-body">
+            <p class="hint-text">请上传 `.java` 源码文件或打包的 `.zip` 文件以供分析引擎读取。</p>
+            <!-- 假设组件内部样式已被重置，或自然融入 -->
+            <FileUpload :project-id="projectId" @uploaded="loadProject" />
           </div>
         </div>
       </div>
@@ -100,29 +124,6 @@ const tasks = ref<any[]>([])
 const tasksLoading = ref(false)
 const scanning = ref(false)
 
-const projectInfoItems = computed(() => [
-  {
-    label: '项目描述',
-    value: project.value?.description || '-',
-    icon: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>`
-  },
-  {
-    label: '文件数量',
-    value: `${project.value?.fileCount || 0} 个`,
-    icon: `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>`
-  },
-  {
-    label: '存储路径',
-    value: project.value?.sourcePath || '-',
-    icon: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd"/></svg>`
-  },
-  {
-    label: '创建时间',
-    value: formatDate(project.value?.createTime),
-    icon: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>`
-  }
-])
-
 onMounted(() => { loadProject(); loadTasks() })
 
 async function loadProject() {
@@ -144,7 +145,7 @@ async function handleScan() {
   scanning.value = true
   try {
     await runScan(projectId)
-    ElMessage.success('扫描任务已创建，请稍后刷新查看结果')
+    ElMessage.success('扫描任务已下发执行队列')
     setTimeout(() => loadTasks(), 2000)
   } finally {
     scanning.value = false
@@ -152,7 +153,7 @@ async function handleScan() {
 }
 
 function statusLabel(s: string) {
-  return { PENDING: 'PNDG', RUNNING: 'EXEC', COMPLETED: 'DONE', FAILED: 'FAIL' }[s] || s
+  return { PENDING: '队列中', RUNNING: '分析中', COMPLETED: '成功', FAILED: '失败' }[s] || s
 }
 
 function formatDate(date: string) {
@@ -161,270 +162,150 @@ function formatDate(date: string) {
 </script>
 
 <style scoped>
-@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@400;500;700&display=swap');
-
-.terminal-page {
-  --bg-dark: #090a0f;
-  --bg-panel: #11131a;
-  --bg-card: #161922;
-  --clr-accent: #ccff00;
-  --clr-success: #00e5ff;
-  --clr-warning: #ffaa00;
-  --clr-danger: #ff3366;
-  --clr-text-main: #ffffff;
-  --clr-text-muted: #6b7280;
-  --clr-border: #272a35;
-
+.sq-page {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  font-family: 'Space Mono', monospace;
-  color: var(--clr-text-main);
+  gap: 24px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #333333;
 }
 
-.brutal-header {
+.sq-page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 2px solid var(--clr-border);
-  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e1e6eb;
+  padding-bottom: 12px;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 16px;
 }
 
-.brutal-back-btn {
-  background: transparent;
-  border: none;
-  color: var(--clr-text-muted);
-  font-family: 'Space Mono', monospace;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: color 0.2s;
-}
-
-.brutal-back-btn:hover { color: var(--clr-text-main); }
-.brutal-back-btn .arrow { color: var(--clr-accent); }
-
-.target-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.target-label {
-  font-size: 0.75rem;
-  color: var(--clr-text-muted);
-  font-weight: 700;
-}
-
-.display-title {
-  font-family: 'Clash Display', sans-serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--clr-text-main);
+.sq-page-title {
+  font-size: 20px;
+  font-weight: 600;
   margin: 0;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  color: #222222;
 }
 
-/* 按钮样式复用 */
-.brutal-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  font-family: 'Space Mono', monospace;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+.sq-back-btn {
+  display: flex; align-items: center; gap: 4px;
+  background: transparent; border: none;
+  font-size: 13px; color: #555555; cursor: pointer; padding: 0;
 }
+.sq-back-btn:hover { color: #0271b6; text-decoration: underline; }
 
-.brutal-btn.primary {
-  background: var(--clr-text-main);
-  color: var(--bg-dark);
-  box-shadow: 4px 4px 0px var(--clr-accent);
+.sq-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 3px;
+  font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent;
 }
+.sq-btn.primary { background-color: #0271b6; color: #ffffff; }
+.sq-btn.primary:hover:not(:disabled) { background-color: #005a92; }
+.sq-btn.primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.brutal-btn.primary:hover:not(:disabled) {
-  background: var(--clr-accent);
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0px var(--clr-accent);
-}
-
-.brutal-btn.primary:active:not(:disabled) {
-  transform: translate(4px, 4px);
-  box-shadow: 0px 0px 0px transparent;
-}
-
-.brutal-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
-
-.btn-spinner {
-  width: 14px; height: 14px; border: 2px solid var(--bg-dark);
-  border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite;
-}
+.btn-spinner { width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* 信息矩阵 */
-.info-bento {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1rem;
-}
-
-.brutal-info-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--clr-border);
-  padding: 1.25rem;
+/* 信息横幅 */
+.sq-info-banner {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  position: relative;
+  background-color: #f9f9fb;
+  border: 1px solid #e1e6eb;
+  border-radius: 2px;
+  padding: 16px 20px;
+  gap: 40px;
+  flex-wrap: wrap;
 }
 
-.brutal-info-card::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 3px; height: 100%;
-  background: var(--clr-text-muted);
-}
+.info-item { display: flex; flex-direction: column; gap: 4px; }
+.info-label { font-size: 12px; color: #777777; }
+.info-value { font-size: 14px; font-weight: 500; color: #333333; }
+.code-font { font-family: Consolas, Monaco, monospace; font-size: 13px; background: #eef2f5; padding: 2px 6px; border-radius: 2px; }
 
-.card-top {
+/* 左右分栏布局 */
+.sq-two-col-layout {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 24px;
 }
 
-.info-icon {
-  color: var(--clr-text-muted);
-  display: flex;
-  align-items: center;
-}
-.info-icon :deep(svg) { width: 16px; height: 16px; }
+.sq-main-col { flex: 1; min-width: 0; }
+.sq-side-col { width: 320px; flex-shrink: 0; }
 
-.info-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--clr-text-muted);
+@media (max-width: 1000px) {
+  .sq-two-col-layout { flex-direction: column; }
+  .sq-side-col { width: 100%; }
 }
 
-.info-value {
-  font-family: 'Noto Sans SC', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--clr-text-main);
-  word-break: break-all;
-  padding-left: 26px;
+.sq-panel {
+  background: #ffffff;
+  border: 1px solid #e1e6eb;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
-/* 模块容器 */
-.brutal-section {
-  background: var(--bg-panel);
-  border: 1px solid var(--clr-border);
-  display: flex;
-  flex-direction: column;
-  box-shadow: 8px 8px 0px rgba(0,0,0,0.3);
+.panel-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; border-bottom: 1px solid #e1e6eb; background-color: #fafbfc;
+}
+.panel-title { font-size: 14px; font-weight: 600; color: #333333; margin: 0; }
+
+.panel-body { padding: 16px; }
+.panel-body.no-padding { padding: 0; }
+
+.hint-text { font-size: 13px; color: #666; margin: 0 0 16px 0; line-height: 1.5; }
+
+.sq-btn-text { background: transparent; border: none; font-size: 12px; color: #0271b6; cursor: pointer; padding: 0; }
+.sq-btn-text:hover { text-decoration: underline; }
+
+/* 数据表格 */
+.sq-task-table { display: flex; flex-direction: column; }
+
+.table-header {
+  display: flex; padding: 10px 16px; background-color: #ffffff;
+  border-bottom: 1px solid #e1e6eb; font-size: 12px; font-weight: 600; color: #777777;
 }
 
-.section-top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1.25rem;
-  background: var(--bg-dark);
-  border-bottom: 1px solid var(--clr-border);
+.table-row {
+  display: flex; align-items: center; padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6; font-size: 13px;
 }
+.table-row:last-child { border-bottom: none; }
+.table-row:hover { background-color: #f9f9fb; }
 
-.bar-title { font-weight: 700; font-size: 0.85rem; }
-.bar-status { color: var(--clr-text-muted); font-size: 0.75rem; }
+.col-id { width: 80px; color: #777; font-family: Consolas, monospace; }
+.col-status { width: 100px; }
+.col-metrics { flex: 1; display: flex; gap: 8px; }
+.col-time { width: 160px; color: #555; }
+.col-actions { width: 140px; text-align: right; }
 
-.brutal-text-btn {
-  background: transparent;
-  border: none;
-  color: var(--clr-accent);
-  font-family: 'Space Mono', monospace;
-  font-weight: 700;
-  font-size: 0.75rem;
-  cursor: pointer;
+.divider { color: #cccccc; margin: 0 4px; }
+.text-red { color: #d4333f; font-weight: 600; }
+.text-orange { color: #ed7d20 !important; }
+
+/* 状态 Badge (SonarQube 风格) */
+.sq-status-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 2px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  border: 1px solid transparent;
 }
-.brutal-text-btn:hover { color: var(--clr-text-main); }
+.sq-status-badge.pending { background-color: #f3f4f6; color: #555; border-color: #d1d5db; }
+.sq-status-badge.running { background-color: #fef0cd; color: #d47e00; border-color: #fcdca3; }
+.sq-status-badge.completed { background-color: #e5f6e5; color: #00aa00; border-color: #bce1bc; }
+.sq-status-badge.failed { background-color: #fae1e3; color: #d4333f; border-color: #f2c2c5; }
 
-.section-content { padding: 1.5rem; }
-.section-content.no-padding { padding: 0; }
+.sq-link { color: #0271b6; cursor: pointer; text-decoration: none; }
+.sq-link:hover { text-decoration: underline; }
 
-.hint-text {
-  font-size: 0.75rem;
-  color: var(--clr-text-muted);
-  margin: 0 0 1rem 0;
+.sq-loading-placeholder { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.sq-skeleton-row { height: 36px; background-color: #f3f4f6; border-radius: 2px; animation: pulse 1.5s infinite; }
+
+.sq-empty-state {
+  padding: 40px; text-align: center; color: #777777; font-size: 13px;
 }
-
-/* 终端日志列表 */
-.log-empty {
-  padding: 3rem;
-  text-align: center;
-  color: var(--clr-text-muted);
-  font-size: 0.85rem;
-  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.2), rgba(0,0,0,0.2) 1px, transparent 1px, transparent 2px);
-}
-.blink { animation: blink 1s step-end infinite; }
-
-.log-list { display: flex; flex-direction: column; }
-
-.log-row {
-  display: flex;
-  align-items: center;
-  border-bottom: 1px dashed var(--clr-border);
-  padding: 1rem 1.5rem;
-  transition: background 0.2s;
-}
-.log-row:hover { background: var(--bg-card); }
-.log-row:last-child { border-bottom: none; }
-
-.log-col { flex-shrink: 0; }
-
-.id-col { width: 80px; color: var(--clr-text-muted); font-weight: 700; }
-
-.status-col { width: 120px; }
-.brutal-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 2px 8px; border: 1px solid currentColor;
-  font-size: 0.7rem; font-weight: 700;
-}
-.dot { width: 6px; height: 6px; background: currentColor; }
-
-.brutal-badge.pending { color: var(--clr-text-muted); }
-.brutal-badge.running { color: var(--clr-warning); animation: pulse-border 1.5s infinite; }
-.brutal-badge.completed { color: var(--clr-success); }
-.brutal-badge.failed { color: var(--clr-danger); }
-
-@keyframes pulse-border { 0%, 100% { border-color: rgba(255, 170, 0, 0.3); } 50% { border-color: var(--clr-warning); } }
-
-.meta-col {
-  flex: 1; display: flex; gap: 2rem; font-size: 0.8rem; color: var(--clr-text-main);
-}
-.meta-item span:first-child { color: var(--clr-text-muted); margin-right: 4px; }
-.text-danger { color: var(--clr-danger); font-weight: 700; }
-
-.action-col { display: flex; gap: 1.5rem; }
-
-.brutal-action-link {
-  background: transparent; border: none; font-family: 'Space Mono', monospace;
-  font-size: 0.75rem; font-weight: 700; cursor: pointer; color: var(--clr-text-muted);
-  text-decoration: underline; text-underline-offset: 4px;
-}
-.brutal-action-link:hover { color: var(--clr-text-main); }
-.brutal-action-link.text-warning:hover { color: var(--clr-warning); }
-
-/* 骨架屏 */
-.log-rows-container { padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
-.log-skeleton { height: 40px; background: var(--bg-card); opacity: 0.5; animation: pulse-slow 2s infinite; }
+.sq-empty-state p { margin: 4px 0; }
 </style>

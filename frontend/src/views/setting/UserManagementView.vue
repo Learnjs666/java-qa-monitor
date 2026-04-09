@@ -1,57 +1,54 @@
 <template>
-  <div class="terminal-page">
-    <div class="page-header">
-      <div class="header-title-group">
-        <span class="blinking-cursor">_</span>
-        <h2 class="display-title">ENTITY_CONTROL // USERS</h2>
-      </div>
+  <div class="sq-page">
+    <div class="sq-page-header">
+      <h2 class="sq-page-title">系统用户管理</h2>
       <div class="header-right">
-        <div class="brutal-search-wrap">
-          <span class="search-prefix">查找></span>
-          <input v-model="searchQuery" class="brutal-search-input" placeholder="USERNAME..." />
+        <div class="sq-search-wrap">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14" class="search-icon">
+            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+          </svg>
+          <input v-model="searchQuery" class="sq-search-input" placeholder="输入用户名搜索..." />
         </div>
-        <button class="brutal-btn primary" @click="openDialog('CREATE')">
-          <span class="btn-icon">+</span>
-          <span class="btn-text">创建用户</span>
+        <button class="sq-btn primary" @click="openDialog('CREATE')">
+          添加新用户
         </button>
       </div>
     </div>
 
-    <div class="stats-grid">
-      <div class="brutal-stat-block default">
-        <span class="stat-label">用户数量</span>
+    <div class="sq-stats-banner">
+      <div class="sq-stat-item">
         <span class="stat-val">{{ users.length }}</span>
+        <span class="stat-label">注册用户</span>
       </div>
-      <div class="brutal-stat-block admin">
-        <span class="stat-label">管理账户</span>
-        <span class="stat-val">{{ adminCount }}</span>
+      <div class="stat-divider"></div>
+      <div class="sq-stat-item">
+        <span class="stat-val text-blue">{{ adminCount }}</span>
+        <span class="stat-label">系统管理员</span>
       </div>
-      <div class="brutal-stat-block active">
-        <span class="stat-label">活跃用户</span>
-        <span class="stat-val">{{ activeCount }}</span>
-      </div>
-      <div class="brutal-stat-block banned">
-        <span class="stat-label">受限用户</span>
-        <span class="stat-val">{{ users.length - activeCount }}</span>
+      <div class="stat-divider"></div>
+      <div class="sq-stat-item">
+        <span class="stat-val text-red">{{ users.length - activeCount }}</span>
+        <span class="stat-label">封禁节点</span>
       </div>
     </div>
 
-    <div class="brutal-table-panel">
-      <div v-if="loading" class="terminal-loading">
-        <div v-for="i in 5" :key="i" class="brutal-skeleton-row"></div>
+    <!-- 用户列表表格 -->
+    <div class="sq-panel">
+      <div v-if="loading" class="sq-loading-placeholder">
+        <div v-for="i in 5" :key="i" class="sq-skeleton-row"></div>
       </div>
 
-      <div v-else-if="filteredUsers.length === 0" class="terminal-empty">
-        <span class="blink">_</span> NO_ENTITIES_FOUND.
+      <div v-else-if="filteredUsers.length === 0" class="sq-empty-state">
+        无匹配的系统用户。
       </div>
 
-      <div v-else class="brutal-data-table">
+      <div v-else class="sq-table">
         <div class="table-header">
-          <div class="col-id">ID</div>
-          <div class="col-user">用户名</div>
-          <div class="col-role">权限级别</div>
-          <div class="col-status">状态</div>
-          <div class="col-time">最后活动</div>
+          <div class="col-id">内部ID</div>
+          <div class="col-user">账号标识 (Username)</div>
+          <div class="col-role">系统权限</div>
+          <div class="col-status">账户状态</div>
+          <div class="col-time">创建时间</div>
           <div class="col-actions">操作</div>
         </div>
 
@@ -61,91 +58,67 @@
           class="table-row"
           :class="{ 'is-banned': !user.status }"
         >
-          <div class="col-id">0x{{ String(user.id).padStart(4, '0') }}</div>
-          
+          <div class="col-id">{{ String(user.id).padStart(4, '0') }}</div>
           <div class="col-user">
-            <div class="user-identity">
-              <span class="user-avatar">[{{ user.username.charAt(0).toUpperCase() }}]</span>
-              <span class="username">{{ user.username }}</span>
-            </div>
+            <span class="user-avatar">{{ user.username.charAt(0).toUpperCase() }}</span>
+            <span class="username">{{ user.username }}</span>
           </div>
-          
           <div class="col-role">
-            <span class="role-badge" :class="user.role.toLowerCase()">
-              {{ user.role === 'ADMIN' ? '[ ROOT_ADMIN ]' : '[ STANDARD_USER ]' }}
+            <span class="role-text" :class="user.role.toLowerCase()">
+              {{ user.role === 'ADMIN' ? 'Administrator' : 'Standard User' }}
             </span>
           </div>
-          
           <div class="col-status">
-            <span class="status-indicator" :class="user.status ? 'active' : 'banned'">
-              <span class="dot"></span>
-              {{ user.status ? 'ONLINE' : 'TERMINATED' }}
-            </span>
+            <span class="status-dot" :class="user.status ? 'active' : 'banned'"></span>
+            {{ user.status ? '正常' : '已封禁' }}
           </div>
-
-          <div class="col-time">{{ user.updateTime || 'NEVER' }}</div>
-
+          <div class="col-time">{{ user.createTime || '从未登录' }}</div>
           <div class="col-actions">
-            <button class="brutal-action-link text-warning" @click="openDialog('EDIT', user)">[ 编辑 ]</button>
+            <button class="sq-btn-text" @click="openDialog('EDIT', user)">配置权限</button>
+            <span class="divider">|</span>
             <button 
-              class="brutal-action-link" 
-              :class="user.status ? 'text-danger' : 'text-success'"
+              class="sq-btn-text" 
+              :class="user.status ? 'danger' : 'success'"
               @click="toggleStatus(user)"
             >
-              {{ user.status ? '[ 禁用 ]' : '[ 恢复 ]' }}
+              {{ user.status ? '封禁账号' : '解封' }}
             </button>
           </div>
         </div>
       </div>
-      <div class="table-footer">
-        <span>END_OF_STREAM // {{ filteredUsers.length }} RECORDS RENDERED.</span>
-      </div>
     </div>
 
+    <!-- 配置弹窗 -->
     <el-dialog 
       v-model="showDialog" 
-      :title="dialogMode === 'CREATE' ? 'INITIALIZE_NEW_ENTITY' : 'RECONFIGURE_ENTITY'" 
-      width="480px" 
+      :title="dialogMode === 'CREATE' ? '添加系统用户' : '重新配置用户权限'" 
+      width="450px" 
       :close-on-click-modal="false" 
-      class="brutal-dialog"
+      class="sq-dialog"
     >
-      <el-form :model="form" label-position="top" class="brutal-form">
-        <el-form-item label="IDENTITY_STRING (用户名)">
-          <div class="input-wrapper">
-            <span class="input-prefix">USR></span>
-            <el-input v-model="form.username" :disabled="dialogMode === 'EDIT'" placeholder="ENTER_USERNAME..." size="large" class="brutal-input" />
-          </div>
+      <el-form :model="form" label-position="top" class="sq-dialog-form">
+        <el-form-item label="登录账号 (Username)">
+          <el-input v-model="form.username" :disabled="dialogMode === 'EDIT'" placeholder="输入登录名" class="sq-input" />
         </el-form-item>
 
-        <el-form-item label="SECURITY_KEY (密码)" v-if="dialogMode === 'CREATE'">
-          <div class="input-wrapper">
-            <span class="input-prefix">PWD></span>
-            <el-input v-model="form.password" type="password" placeholder="ASSIGN_PASSWORD..." size="large" show-password class="brutal-input" />
-          </div>
+        <el-form-item label="登录密码" v-if="dialogMode === 'CREATE'">
+          <el-input v-model="form.password" type="password" placeholder="设置初始密码" show-password class="sq-input" />
         </el-form-item>
 
-        <el-form-item label="CLEARANCE_LEVEL (权限级别)">
-          <div class="brutal-select-wrapper full-width">
-            <span class="select-prefix">ROLE:</span>
-            <el-select
-              v-model="form.role"
-              size="large"
-              class="brutal-select"
-              popper-class="brutal-popper"
-            >
-              <el-option label="[ STANDARD_USER ]" value="USER" />
-              <el-option label="[ ROOT_ADMIN ]" value="ADMIN" />
-            </el-select>
-          </div>
+        <el-form-item label="系统权限 (Role)">
+          <el-select v-model="form.role" class="sq-select-full">
+            <el-option label="Standard User (普通用户)" value="USER" />
+            <el-option label="Administrator (系统管理员)" value="ADMIN" />
+          </el-select>
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <div class="dialog-footer">
-          <button class="brutal-btn outline-muted" @click="showDialog = false">取消</button>
-          <button class="brutal-btn primary" :disabled="submitting" @click="handleSubmit">
+        <div class="sq-dialog-footer">
+          <button class="sq-btn default" @click="showDialog = false">取消</button>
+          <button class="sq-btn primary" :disabled="submitting" @click="handleSubmit">
             <span class="btn-spinner" v-if="submitting"></span>
-            {{ submitting ? '处理中...' : '确定' }}
+            {{ submitting ? '保存中...' : '保 存' }}
           </button>
         </div>
       </template>
@@ -157,7 +130,8 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getUserList, register } from '../../api/user'
-import {updateUser} from "../../api/user";
+import {updateUser, updateUserStatus} from "../../api/user"
+import { ca } from 'element-plus/es/locale/index.mjs'
 
 const users = ref<any[]>([])
 const loading = ref(false)
@@ -182,9 +156,7 @@ const filteredUsers = computed(() => {
 const adminCount = computed(() => users.value.filter(u => u.role === 'ADMIN').length)
 const activeCount = computed(() => users.value.filter(u => u.isActive).length)
 
-onMounted(() => {
-  fetchUsers()
-})
+onMounted(() => fetchUsers())
 
 async function fetchUsers() {
   loading.value = true
@@ -248,321 +220,86 @@ async function handleSubmit() {
 }
 
 async function toggleStatus(user: any) {
-  const actionText = user.isActive ? 'TERMINATE (禁用)' : 'RESTORE (恢复)'
-  await ElMessageBox.confirm(
-    `CONFIRM DIRECTIVE: ${actionText} ENTITY [${user.username}] ?`,
-    'SYSTEM_WARNING',
-    {
-      confirmButtonText: 'CONFIRM',
-      cancelButtonText: 'ABORT',
-      type: 'warning',
-      customClass: 'brutal-message-box' // 如果你想在全局深定制 MessageBox，可预留此 class
-    }
-  )
-  
-  // TODO: await toggleUserStatus(user.id, !user.isActive)
-  ElMessage.success(`ENTITY_STATUS_UPDATED`)
-  user.isActive = !user.isActive // 模拟前端状态切换
+  const actionText = user.status ? '封禁' : '解封'
+  await ElMessageBox.confirm(`确认要${actionText}账户 [${user.username}] 吗？`, '安全警告', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' })
+  try {
+    await updateUserStatus(user.id, user.status)
+    ElMessage.success(`账号状态已更新`)
+    user.status = !user.status // 本地更新状态
+  } catch (error) {
+    console.error('状态更新失败', error)
+  } 
 }
 </script>
 
 <style scoped>
-@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+.sq-page { display: flex; flex-direction: column; gap: 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333333; }
+.sq-page-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid #e1e6eb; padding-bottom: 12px; }
+.sq-page-title { font-size: 20px; font-weight: 600; margin: 0; color: #222222; }
 
-.terminal-page {
-  --bg-dark: #090a0f;
-  --bg-panel: #11131a;
-  --bg-card: #161922;
-  --clr-accent: #ccff00;
-  --clr-success: #00e5ff;
-  --clr-warning: #ffaa00;
-  --clr-danger: #ff3366;
-  --clr-admin: #a259ff; /* 紫色代表高权限 Root */
-  --clr-text-main: #ffffff;
-  --clr-text-muted: #6b7280;
-  --clr-border: #272a35;
+.header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.sq-search-wrap { display: flex; align-items: center; gap: 8px; border: 1px solid #cccccc; border-radius: 3px; padding: 6px 10px; background: #ffffff; transition: border-color 0.2s; }
+.sq-search-wrap:focus-within { border-color: #0271b6; }
+.search-icon { color: #999999; }
+.sq-search-input { border: none; outline: none; font-size: 13px; color: #333333; width: 180px; }
 
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  font-family: 'Space Mono', monospace;
-  color: var(--clr-text-main);
-  padding-bottom: 2rem;
-}
+.sq-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 3px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+.sq-btn.primary { background-color: #0271b6; color: #ffffff; }
+.sq-btn.primary:hover:not(:disabled) { background-color: #005a92; }
+.sq-btn.default { background-color: #ffffff; border-color: #cccccc; color: #333333; }
+.sq-btn.default:hover { border-color: #999999; background-color: #f9f9f9; }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 2px solid var(--clr-border);
-  padding-bottom: 1.5rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
+.sq-stats-banner { display: flex; background: #ffffff; border: 1px solid #e1e6eb; border-radius: 2px; padding: 16px 24px; gap: 40px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+.sq-stat-item { display: flex; align-items: baseline; gap: 8px; }
+.stat-val { font-size: 24px; font-weight: 600; color: #333333; line-height: 1; }
+.stat-label { font-size: 13px; color: #777777; }
+.text-blue { color: #0271b6; }
+.text-red { color: #d4333f; }
+.stat-divider { width: 1px; background: #e1e6eb; }
 
-.header-title-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.sq-panel { background: #ffffff; border: 1px solid #e1e6eb; border-radius: 2px; overflow-x: auto; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+.sq-loading-placeholder { display: flex; flex-direction: column; gap: 8px; padding: 16px; }
+.sq-skeleton-row { height: 40px; background: #f3f4f6; animation: pulse 1.5s infinite; }
+.sq-empty-state { padding: 40px; text-align: center; color: #777777; font-size: 13px; }
 
-.blinking-cursor {
-  font-size: 2rem;
-  color: var(--clr-accent);
-  animation: blink 1s step-end infinite;
-}
-
-@keyframes blink { 50% { opacity: 0; } }
-
-.display-title {
-  font-family: 'Clash Display', sans-serif;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--clr-text-main);
-  margin: 0;
-  letter-spacing: 0.05em;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-/* 搜索框 */
-.brutal-search-wrap {
-  display: flex;
-  align-items: center;
-  background: var(--bg-dark);
-  border: 1px solid var(--clr-border);
-  transition: all 0.2s ease;
-}
-
-.brutal-search-wrap:focus-within {
-  border-color: var(--clr-accent);
-  box-shadow: 4px 4px 0px rgba(204, 255, 0, 0.15);
-}
-
-.search-prefix {
-  padding: 0 0.75rem;
-  font-size: 0.8rem;
-  color: var(--clr-accent);
-  font-weight: 700;
-  border-right: 1px solid var(--clr-border);
-}
-
-.brutal-search-input {
-  border: none;
-  outline: none;
-  background: transparent;
-  color: var(--clr-text-main);
-  font-family: 'Space Mono', monospace;
-  font-size: 0.8rem;
-  padding: 0.6rem 0.75rem;
-  width: 220px;
-}
-
-/* 按钮 */
-.brutal-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  font-family: 'Space Mono', monospace;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.brutal-btn.primary {
-  background: var(--clr-text-main);
-  color: var(--bg-dark);
-  box-shadow: 4px 4px 0px var(--clr-accent);
-}
-
-.brutal-btn.primary:hover:not(:disabled) {
-  background: var(--clr-accent);
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0px var(--clr-accent);
-}
-
-.brutal-btn.primary:active:not(:disabled) {
-  transform: translate(4px, 4px);
-  box-shadow: 0px 0px 0px transparent;
-}
-
-.brutal-btn.outline-muted {
-  background: transparent;
-  border: 1px solid var(--clr-border);
-  color: var(--clr-text-muted);
-}
-.brutal-btn.outline-muted:hover {
-  border-color: var(--clr-text-main);
-  color: var(--clr-text-main);
-}
-.brutal-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
-
-/* 统计卡片 */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-}
-
-.brutal-stat-block {
-  background: var(--bg-panel);
-  border: 1px solid var(--clr-border);
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  position: relative;
-}
-
-.brutal-stat-block::after {
-  content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
-}
-.brutal-stat-block.default::after { background: var(--clr-text-muted); }
-.brutal-stat-block.admin::after { background: var(--clr-admin); }
-.brutal-stat-block.active::after { background: var(--clr-success); }
-.brutal-stat-block.banned::after { background: var(--clr-danger); }
-
-.stat-label { font-size: 0.75rem; color: var(--clr-text-muted); font-weight: 700; }
-.stat-val { font-family: 'Clash Display', sans-serif; font-size: 2.5rem; font-weight: 700; line-height: 1; color: var(--clr-text-main); }
-.brutal-stat-block.admin .stat-val { color: var(--clr-admin); text-shadow: 0 0 10px rgba(162,89,255,0.3); }
-
-/* 数据表格 */
-.brutal-table-panel {
-  background: var(--bg-panel);
-  border: 1px solid var(--clr-border);
-  box-shadow: 8px 8px 0px rgba(0,0,0,0.5);
-  overflow-x: auto;
-}
-
-.terminal-loading { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
-.brutal-skeleton-row { height: 50px; background: var(--bg-card); opacity: 0.5; animation: pulse-slow 2s infinite; }
-@keyframes pulse-slow { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
-
-.terminal-empty { padding: 4rem; text-align: center; color: var(--clr-text-muted); font-size: 0.85rem; }
-
-.brutal-data-table { min-width: 900px; display: flex; flex-direction: column; }
-
-.table-header {
-  display: grid;
-  grid-template-columns: 80px 2fr 1.5fr 1.5fr 1.5fr 200px;
-  padding: 1rem 1.5rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--clr-accent);
-  background: var(--bg-dark);
-  border-bottom: 1px solid var(--clr-border);
-}
-
-.table-row {
-  display: grid;
-  grid-template-columns: 80px 2fr 1.5fr 1.5fr 1.5fr 200px;
-  padding: 1rem 1.5rem;
-  align-items: center;
-  border-bottom: 1px dashed var(--clr-border);
-  transition: background 0.2s;
-  font-size: 0.85rem;
-}
-
-.table-row:hover { background: var(--bg-card); }
+.sq-table { min-width: 900px; display: flex; flex-direction: column; }
+.table-header { display: grid; grid-template-columns: 80px 2fr 1.5fr 120px 1.5fr 150px; padding: 10px 16px; font-size: 12px; font-weight: 600; color: #777777; border-bottom: 1px solid #e1e6eb; background-color: #fafbfc; }
+.table-row { display: grid; grid-template-columns: 80px 2fr 1.5fr 120px 1.5fr 150px; padding: 12px 16px; border-bottom: 1px solid #f3f4f6; align-items: center; font-size: 13px; transition: background 0.15s; }
+.table-row:hover { background-color: #f9f9fb; }
 .table-row:last-child { border-bottom: none; }
-.table-row.is-banned { opacity: 0.6; background: rgba(255,51,102,0.03); filter: grayscale(0.5); }
+.table-row.is-banned { opacity: 0.6; color: #777; }
 
-.col-id { color: var(--clr-text-muted); font-weight: 700; }
+.col-id { color: #777; font-family: Consolas, monospace; font-size: 12px; }
+.col-user { display: flex; align-items: center; gap: 8px; }
+.user-avatar { width: 24px; height: 24px; background: #eef2f5; color: #0271b6; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.username { font-weight: 600; color: #0271b6; }
 
-.user-identity { display: flex; align-items: center; gap: 10px; }
-.user-avatar { font-weight: 800; color: var(--clr-accent); }
-.username { font-weight: 700; color: var(--clr-text-main); }
+.role-text { font-size: 12px; font-weight: 600; padding: 2px 6px; border-radius: 2px; }
+.role-text.admin { color: #0271b6; background: #eef2f5; border: 1px solid #bce1f1; }
+.role-text.user { color: #555555; background: #f3f4f6; border: 1px solid #e1e6eb; }
 
-.role-badge { font-weight: 700; font-size: 0.75rem; }
-.role-badge.admin { color: var(--clr-admin); }
-.role-badge.user { color: var(--clr-text-muted); }
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.status-dot.active { background-color: #00aa00; }
+.status-dot.banned { background-color: #d4333f; }
 
-.status-indicator { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.75rem; }
-.status-indicator .dot { width: 6px; height: 6px; background: currentColor; }
-.status-indicator.active { color: var(--clr-success); }
-.status-indicator.banned { color: var(--clr-danger); }
+.col-time { color: #555555; font-size: 12px; }
+.col-actions { display: flex; align-items: center; gap: 8px; }
+.divider { color: #cccccc; font-size: 10px; }
 
-.col-time { color: var(--clr-text-muted); font-size: 0.8rem; }
+.sq-btn-text { background: transparent; border: none; padding: 0; font-size: 12px; font-weight: 500; color: #0271b6; cursor: pointer; }
+.sq-btn-text:hover { text-decoration: underline; }
+.sq-btn-text.danger { color: #d4333f; }
+.sq-btn-text.success { color: #00aa00; }
 
-.col-actions { display: flex; gap: 1rem; }
-
-.brutal-action-link {
-  background: transparent; border: none; font-family: 'Space Mono', monospace;
-  font-size: 0.75rem; font-weight: 700; cursor: pointer; text-decoration: none;
-}
-.brutal-action-link.text-warning { color: var(--clr-warning); }
-.brutal-action-link.text-warning:hover { color: #fff; background: var(--clr-warning); }
-.brutal-action-link.text-danger { color: var(--clr-danger); }
-.brutal-action-link.text-danger:hover { color: #fff; background: var(--clr-danger); }
-.brutal-action-link.text-success { color: var(--clr-success); }
-.brutal-action-link.text-success:hover { color: #000; background: var(--clr-success); }
-
-.table-footer {
-  padding: 0.75rem 1.5rem;
-  background: var(--bg-dark);
-  border-top: 1px solid var(--clr-border);
-  font-size: 0.7rem;
-  color: var(--clr-text-muted);
-  font-weight: 700;
-}
-
-/* 弹窗与表单覆写 */
-:deep(.el-dialog) {
-  background: #11131a !important;
-  border: 1px solid #272a35 !important;
-  border-radius: 0 !important;
-  box-shadow: 16px 16px 0px rgba(0,0,0,0.8) !important;
-}
-:deep(.el-dialog__title) {
-  font-family: 'Space Mono', monospace !important;
-  color: #ccff00 !important;
-  font-weight: 700 !important;
-}
-:deep(.el-form-item__label) {
-  color: #6b7280 !important;
-  font-family: 'Space Mono', monospace !important;
-  font-size: 0.8rem !important;
-  line-height: 1.2 !important;
-  padding-bottom: 6px !important;
-}
-
-.input-wrapper {
-  display: flex; align-items: center; background: #090a0f;
-  border: 1px solid #272a35; transition: all 0.2s ease; width: 100%;
-}
-.input-wrapper:focus-within { border-color: #ccff00; box-shadow: 4px 4px 0px rgba(204,255,0,0.15); }
-
-.input-prefix {
-  padding-left: 1rem; font-size: 0.85rem; color: #ccff00; user-select: none;
-}
-
-.brutal-input :deep(.el-input__wrapper) {
-  background: transparent !important; border: none !important;
-  box-shadow: none !important; border-radius: 0 !important;
-}
-.brutal-input :deep(.el-input__inner) {
-  color: #ffffff !important; font-family: 'Space Mono', monospace !important; font-size: 0.85rem;
-}
-
-.brutal-select-wrapper { display: flex; align-items: center; background: #090a0f; border: 1px solid #272a35; }
-.brutal-select-wrapper.full-width { width: 100%; }
-.select-prefix { padding-left: 1rem; font-size: 0.85rem; color: #ccff00; font-weight: 700; border-right: 1px solid #272a35; }
-.brutal-select :deep(.el-input__wrapper) { background: transparent !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; }
-.brutal-select :deep(.el-input__inner) { color: #ffffff !important; font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700; }
-
-.dialog-footer { display: flex; justify-content: flex-end; gap: 1rem; }
-.btn-spinner {
-  width: 14px; height: 14px; border: 2px solid #090a0f;
-  border-top-color: transparent; border-radius: 50%;
-  animation: spin 0.6s linear infinite; display: inline-block;
-}
+:deep(.el-dialog) { border-radius: 4px; }
+:deep(.el-dialog__header) { border-bottom: 1px solid #e1e6eb; padding: 16px 20px; margin: 0; }
+:deep(.el-dialog__title) { font-size: 16px; font-weight: 600; color: #333; }
+:deep(.el-dialog__body) { padding: 24px 20px; }
+:deep(.el-dialog__footer) { border-top: 1px solid #e1e6eb; padding: 16px 20px; }
+.sq-dialog-form :deep(.el-form-item__label) { padding-bottom: 4px; line-height: 1.2; font-size: 13px; font-weight: 600; color: #444; }
+.sq-input :deep(.el-input__wrapper) { border-radius: 3px !important; box-shadow: none !important; border: 1px solid #cccccc !important; }
+.sq-input :deep(.el-input__wrapper.is-focus) { border-color: #0271b6 !important; }
+.sq-select-full :deep(.el-input__wrapper) { width: 100%; border-radius: 3px !important; box-shadow: none !important; border: 1px solid #cccccc !important; }
+.sq-dialog-footer { display: flex; justify-content: flex-end; gap: 12px; }
+.btn-spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
 </style>

@@ -1,24 +1,18 @@
 <template>
-  <div class="terminal-topbar">
-    <div class="process-indicator">
-      <span class="process-label">当前进程</span>
-      <span class="separator">//</span>
-      <h1 class="page-title">{{ pageTitle.toUpperCase() }}</h1>
+  <div class="sq-topbar">
+    <div class="topbar-left">
+      <!-- 移除冗余的面包屑文字，保持与 SonarQube 一致的简洁感 -->
     </div>
-
-    <div class="system-controls">
-      <div class="user-block">
-        <div class="avatar-square">[{{ avatarChar }}]</div>
-        <div class="user-details">
-          <span class="role-label">用户</span>
-          <span class="username">{{ userStore.username || 'UNKNOWN_ENTITY' }}</span>
+    <div class="topbar-right">
+      <div class="user-profile">
+        <div class="avatar">{{ avatarChar }}</div>
+        <div class="user-info">
+          <span class="username">{{ userStore.username || '用户' }}</span>
         </div>
       </div>
-      
-      <button class="brutal-logout-btn" @click="handleLogout">
-        <span class="btn-text">退出</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-          <path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10" stroke-linecap="square" stroke-linejoin="miter"/>
+      <button class="logout-btn" @click="handleLogout" title="退出登录">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+          <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/>
         </svg>
       </button>
     </div>
@@ -27,23 +21,12 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '../store/user'
 import { getUserInfo } from '../api/user'
 
 const userStore = useUserStore()
 const router = useRouter()
-const route = useRoute()
-
-const pageTitles: Record<string, string> = {
-  '/dashboard': 'Dashboard_Metrics',
-  '/project': 'Project_Matrix',
-  '/rules': 'Rule_Configurations',
-}
-
-const pageTitle = computed(() => {
-  return pageTitles[route.path] || pageTitles[Object.keys(pageTitles).find(k => route.path.startsWith(k)) || ''] || 'Standby_Mode'
-})
 
 const avatarChar = computed(() => {
   const name = userStore.username || '?'
@@ -66,110 +49,62 @@ function handleLogout() {
 </script>
 
 <style scoped>
-.terminal-topbar {
+.sq-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 70px;
-  padding: 0 2rem;
-  background-color: var(--bg-panel);
+  height: 60px;
+  padding: 0 24px;
 }
 
-.process-indicator {
+.topbar-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
-.process-label {
-  font-size: 0.75rem;
-  color: var(--clr-text-muted);
-  font-weight: 700;
-}
-
-.separator {
-  color: var(--clr-accent);
-  font-weight: 700;
-}
-
-.page-title {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--clr-text-main);
-  letter-spacing: 0.05em;
-}
-
-.system-controls {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-.user-block {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-right: 2rem;
-  border-right: 1px dashed var(--clr-border);
-}
-
-.avatar-square {
-  width: 36px;
-  height: 36px;
-  background: var(--bg-dark);
-  border: 1px solid var(--clr-accent);
-  color: var(--clr-accent);
-  font-size: 1rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 2px 2px 0px rgba(204, 255, 0, 0.2);
-}
-
-.user-details {
-  display: flex;
-  flex-direction: column;
-}
-
-.role-label {
-  font-size: 0.65rem;
-  color: var(--clr-text-muted);
-}
-
-.username {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--clr-text-main);
-}
-
-/* 终止按钮 (Brutalist style) */
-.brutal-logout-btn {
+.user-profile {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #eef2f5;
+  color: #0271b6;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #c9d1d9;
+}
+
+.username {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333333;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 3px;
+  border: 1px solid transparent;
   background: transparent;
-  border: 1px solid var(--clr-border);
-  color: var(--clr-text-muted);
-  font-family: 'Space Mono', monospace;
-  font-size: 0.8rem;
-  font-weight: 700;
+  color: #777777;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
 
-.brutal-logout-btn:hover {
-  background: #ff3366; /* Danger Red */
-  border-color: #ff3366;
-  color: #fff;
-  box-shadow: 4px 4px 0px rgba(255, 51, 102, 0.3);
-  transform: translate(-2px, -2px);
-}
-
-.brutal-logout-btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: 0px 0px 0px transparent;
+.logout-btn:hover {
+  background-color: #f3f4f6;
+  color: #d4333f;
 }
 </style>
